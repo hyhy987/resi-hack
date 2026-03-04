@@ -1,10 +1,11 @@
 const colors = {
-  blue: "bg-blue-100 text-blue-700",
-  green: "bg-green-100 text-green-700",
-  red: "bg-red-100 text-red-700",
-  yellow: "bg-yellow-100 text-yellow-700",
-  gray: "bg-gray-100 text-gray-700",
-  purple: "bg-purple-100 text-purple-700",
+  blue: "bg-[var(--request-blue-bg)] text-[var(--request-blue)] border border-[var(--request-blue)]/20",
+  green: "bg-[var(--offer-green-bg)] text-[var(--offer-green)] border border-[var(--offer-green)]/20",
+  red: "bg-[var(--danger)]/10 text-[var(--danger)] border border-[var(--danger)]/20",
+  yellow: "bg-[var(--warning)]/10 text-[var(--warning)] border border-[var(--warning)]/20",
+  gray: "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]",
+  purple: "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+  accent: "bg-[var(--accent-glow)] text-[var(--accent)] border border-[var(--accent)]/20",
 } as const;
 
 interface BadgeProps {
@@ -15,7 +16,7 @@ interface BadgeProps {
 export function Badge({ color = "gray", children }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${colors[color]}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-semibold font-[Outfit] tracking-wide ${colors[color]}`}
     >
       {children}
     </span>

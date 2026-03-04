@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
-import { ListingsTable } from "@/components/listings/ListingsTable";
+import { ListingsGrid } from "@/components/listings/ListingsGrid";
 import { CreateListingModal } from "@/components/listings/CreateListingModal";
 import { useAuth } from "@/providers/AuthProvider";
 import { ListingData } from "@/types";
@@ -42,59 +42,36 @@ export default function ListingsPage() {
 
   return (
     <PageContainer>
-      <div className="flex gap-8">
-        {/* Sidebar */}
-        <div className="w-64 shrink-0 hidden lg:block">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
-            <h2 className="font-semibold text-gray-900">Quick Actions</h2>
-            <Button
-              className="w-full"
-              onClick={() => setShowCreate(true)}
-              disabled={!currentUser}
-            >
-              + Create Listing
-            </Button>
-
-            {currentUser && (
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs text-gray-500">Your Credits</p>
-                <p className="text-2xl font-bold text-indigo-600">
-                  {currentUser.trackedCredits}
-                </p>
-              </div>
-            )}
-
-            {!currentUser && (
-              <p className="text-xs text-gray-400">
-                Select a user from the navbar to get started.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">Listings</h1>
-            <Button
-              className="lg:hidden"
-              size="sm"
-              onClick={() => setShowCreate(true)}
-              disabled={!currentUser}
-            >
-              + Create
-            </Button>
-          </div>
-
-          <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
-
-          {loading ? (
-            <div className="text-center py-12 text-gray-400">Loading...</div>
-          ) : (
-            <ListingsTable listings={listings} onRefresh={fetchListings} />
-          )}
-        </div>
+      {/* Hero section */}
+      <div className="mb-10 animate-fade-in-up">
+        <h1 className="text-4xl font-extrabold font-[Outfit] text-[var(--text-primary)] tracking-tight mb-2">
+          Marketplace
+        </h1>
+        <p className="text-[var(--text-secondary)] max-w-lg">
+          Browse credit offers and requests from fellow NUS residents. Click any listing to see details and make an offer.
+        </p>
       </div>
+
+      {/* Controls bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 animate-fade-in-up stagger-2">
+        <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        <Button
+          onClick={() => setShowCreate(true)}
+          disabled={!currentUser}
+          size="md"
+        >
+          + New Listing
+        </Button>
+      </div>
+
+      {/* Listings */}
+      {loading ? (
+        <div className="text-center py-20 animate-fade-in">
+          <div className="inline-block w-6 h-6 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
+        </div>
+      ) : (
+        <ListingsGrid listings={listings} />
+      )}
 
       <CreateListingModal
         open={showCreate}

@@ -34,28 +34,33 @@ export function SwapMessages({ swapId, messages, onRefresh }: Props) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-medium text-gray-900">Messages</h3>
+      <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider font-[Outfit]">
+        Messages
+      </h3>
 
       <div className="space-y-2 max-h-64 overflow-y-auto">
         {messages.length === 0 && (
-          <p className="text-sm text-gray-400">No messages yet</p>
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">No messages yet</p>
         )}
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={`text-sm p-3 rounded-lg ${
-              m.userId === currentUser?.id
-                ? "bg-indigo-50 ml-8"
-                : "bg-gray-50 mr-8"
-            }`}
-          >
-            <p className="font-medium text-xs text-gray-500 mb-1">
-              {m.user.name} &middot;{" "}
-              {new Date(m.createdAt).toLocaleTimeString()}
-            </p>
-            <p className="text-gray-800">{m.message}</p>
-          </div>
-        ))}
+        {messages.map((m) => {
+          const isMine = m.userId === currentUser?.id;
+          return (
+            <div
+              key={m.id}
+              className={`text-sm p-3 rounded-xl ${
+                isMine
+                  ? "bg-[var(--accent)]/10 border border-[var(--accent)]/15 ml-8"
+                  : "bg-[var(--bg-base)] border border-[var(--border-subtle)] mr-8"
+              }`}
+            >
+              <p className="font-medium text-xs text-[var(--text-muted)] mb-1 font-[Outfit]">
+                {m.user.name} &middot;{" "}
+                {new Date(m.createdAt).toLocaleTimeString()}
+              </p>
+              <p className="text-[var(--text-secondary)]">{m.message}</p>
+            </div>
+          );
+        })}
       </div>
 
       {currentUser && (
@@ -65,7 +70,7 @@ export function SwapMessages({ swapId, messages, onRefresh }: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="flex-1 px-3 py-2 text-sm"
             maxLength={1000}
           />
           <Button type="submit" disabled={sending || !text.trim()} size="sm">

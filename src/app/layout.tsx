@@ -15,10 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
+      <body className="antialiased relative">
         <AuthProvider>
           <Navbar />
-          {children}
+          <main className="relative z-10">{children}</main>
         </AuthProvider>
       </body>
     </html>

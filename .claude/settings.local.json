@@ -12,7 +12,8 @@
       "Bash(npx prisma:*)",
       "Bash(curl:*)",
       "Bash(ss:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(npx next:*)"
     ]
   }
 }

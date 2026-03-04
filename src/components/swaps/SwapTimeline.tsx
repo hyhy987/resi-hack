@@ -26,8 +26,8 @@ export function SwapTimeline({ swap }: { swap: SwapData }) {
 
   if (swap.status === "CANCELLED") {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-        <p className="text-red-700 font-medium">Swap Cancelled</p>
+      <div className="p-4 rounded-xl bg-[var(--danger)]/10 border border-[var(--danger)]/20 text-center">
+        <p className="text-[var(--danger)] font-semibold font-[Outfit]">Swap Cancelled</p>
       </div>
     );
   }
@@ -41,40 +41,40 @@ export function SwapTimeline({ swap }: { swap: SwapData }) {
           <div key={step.key} className="flex items-start gap-3">
             <div className="flex flex-col items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold font-[Outfit] transition-all ${
                   isDone
-                    ? "bg-green-500 text-white"
+                    ? "bg-[var(--success)]/20 text-[var(--success)] border border-[var(--success)]/30"
                     : isCurrent
-                    ? "bg-indigo-500 text-white"
-                    : "bg-gray-200 text-gray-500"
+                    ? "bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30 shadow-lg shadow-[var(--accent-glow)]"
+                    : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]"
                 }`}
               >
-                {isDone ? "✓" : i + 1}
+                {isDone ? "\u2713" : i + 1}
               </div>
               {i < steps.length - 1 && (
                 <div
                   className={`w-0.5 h-8 ${
-                    isDone ? "bg-green-300" : "bg-gray-200"
+                    isDone ? "bg-[var(--success)]/30" : "bg-[var(--border)]"
                   }`}
                 />
               )}
             </div>
-            <div className="pt-1">
+            <div className="pt-1.5">
               <p
-                className={`text-sm font-medium ${
+                className={`text-sm font-semibold font-[Outfit] ${
                   isDone
-                    ? "text-green-700"
+                    ? "text-[var(--success)]"
                     : isCurrent
-                    ? "text-indigo-700"
-                    : "text-gray-400"
+                    ? "text-[var(--accent)]"
+                    : "text-[var(--text-muted)]"
                 }`}
               >
                 {step.label}
               </p>
               {isCurrent && step.key === "CONFIRMING" && (
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Giver: {swap.giverConfirmed ? "✓" : "pending"} | Receiver:{" "}
-                  {swap.receiverConfirmed ? "✓" : "pending"}
+                <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                  Giver: {swap.giverConfirmed ? "\u2713" : "pending"} | Receiver:{" "}
+                  {swap.receiverConfirmed ? "\u2713" : "pending"}
                 </p>
               )}
             </div>

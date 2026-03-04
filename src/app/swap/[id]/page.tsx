@@ -31,7 +31,9 @@ export default function SwapDetailPage() {
   if (loading) {
     return (
       <PageContainer>
-        <div className="text-center py-12 text-gray-400">Loading...</div>
+        <div className="text-center py-20 animate-fade-in">
+          <div className="inline-block w-6 h-6 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
+        </div>
       </PageContainer>
     );
   }
@@ -39,41 +41,50 @@ export default function SwapDetailPage() {
   if (!swap) {
     return (
       <PageContainer>
-        <div className="text-center py-12 text-gray-500">Swap not found</div>
+        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">Swap not found</div>
       </PageContainer>
     );
   }
 
   return (
     <PageContainer>
-      <div className="mb-4">
-        <Link href="/" className="text-sm text-indigo-600 hover:underline">
-          &larr; Back to Listings
+      <div className="mb-6 animate-fade-in">
+        <Link
+          href="/"
+          className="text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors font-[Outfit]"
+        >
+          &larr; Back to Marketplace
         </Link>
       </div>
 
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Swap Details</h1>
+      <div className="flex items-center gap-3 mb-8 animate-fade-in-up">
+        <h1 className="text-3xl font-extrabold font-[Outfit] text-[var(--text-primary)] tracking-tight">
+          Swap Details
+        </h1>
         <Badge color={statusColor(swap.status)}>{swap.status}</Badge>
       </div>
 
-      <div className="flex gap-8 flex-col lg:flex-row">
+      <div className="flex gap-6 flex-col lg:flex-row">
         {/* Left: Timeline */}
         <div className="lg:w-1/3">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h2 className="font-semibold text-gray-900 mb-4">Status</h2>
+          <div className="glass-card-static p-6 animate-fade-in-up stagger-1">
+            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-5 font-[Outfit]">
+              Progress
+            </h2>
             <SwapTimeline swap={swap} />
           </div>
         </div>
 
         {/* Right: Actions + Messages */}
         <div className="lg:w-2/3 space-y-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h2 className="font-semibold text-gray-900 mb-4">Actions</h2>
+          <div className="glass-card-static p-6 animate-fade-in-up stagger-2">
+            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-5 font-[Outfit]">
+              Actions
+            </h2>
             <SwapActions swap={swap} onRefresh={fetchSwap} />
           </div>
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <div className="glass-card-static p-6 animate-fade-in-up stagger-3">
             <SwapMessages
               swapId={swap.id}
               messages={swap.messages}

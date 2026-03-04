@@ -17,7 +17,7 @@ export function ProfileForm() {
   const [message, setMessage] = useState("");
 
   if (!currentUser) {
-    return <p className="text-gray-500">Please select a user first.</p>;
+    return <p className="text-[var(--text-muted)]">Please select a user first.</p>;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,35 +45,39 @@ export function ProfileForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
           Name
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+          className="w-full px-3 py-2 text-sm"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Contact Handle
+        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
+          Telegram Handle
         </label>
         <input
           type="text"
           value={contactHandle}
           onChange={(e) => setContactHandle(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+          className="w-full px-3 py-2 text-sm"
+          placeholder="@your_handle"
         />
+        <p className="text-xs text-[var(--text-muted)] mt-1.5">
+          Visible to others on your listings so they can contact you.
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Tracked Credits (0-99)
+        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
+          Tracked Credits <span className="normal-case font-normal">(0-99)</span>
         </label>
         <input
           type="number"
@@ -81,14 +85,16 @@ export function ProfileForm() {
           max="99"
           value={trackedCredits}
           onChange={(e) => setTrackedCredits(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+          className="w-full px-3 py-2 text-sm"
         />
       </div>
 
       {message && (
         <p
-          className={`text-sm ${
-            message.includes("updated") ? "text-green-600" : "text-red-600"
+          className={`text-sm p-2 rounded-lg ${
+            message.includes("updated")
+              ? "text-[var(--success)] bg-[var(--success)]/10"
+              : "text-[var(--danger)] bg-[var(--danger)]/10"
           }`}
         >
           {message}

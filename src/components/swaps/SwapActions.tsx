@@ -41,14 +41,28 @@ export function SwapActions({ swap, onRefresh }: Props) {
   };
 
   return (
-    <div className="space-y-3">
-      {error && <p className="text-sm text-red-600">{error}</p>}
+    <div className="space-y-4">
+      {error && (
+        <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">{error}</p>
+      )}
 
-      <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-1">
-        <p><span className="text-gray-500">Amount:</span> <span className="font-semibold">{swap.amount} credits</span></p>
-        <p><span className="text-gray-500">Your role:</span> <span className="font-semibold">{isGiver ? "Giver" : "Receiver"}</span></p>
-        <p><span className="text-gray-500">Proposer:</span> {swap.proposer.name}</p>
-        <p><span className="text-gray-500">Counterparty:</span> {swap.counterparty.name}</p>
+      <div className="p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-[var(--text-muted)]">Amount</span>
+          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">{swap.amount} credits</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[var(--text-muted)]">Your role</span>
+          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">{isGiver ? "Giver" : "Receiver"}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[var(--text-muted)]">Proposer</span>
+          <span className="text-[var(--text-secondary)]">{swap.proposer.name}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-[var(--text-muted)]">Counterparty</span>
+          <span className="text-[var(--text-secondary)]">{swap.counterparty.name}</span>
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -70,7 +84,7 @@ export function SwapActions({ swap, onRefresh }: Props) {
           )}
 
         {alreadyConfirmed && swap.status !== "COMPLETED" && (
-          <span className="text-sm text-green-600 font-medium py-2">
+          <span className="text-sm text-[var(--success)] font-medium font-[Outfit] py-2">
             You have confirmed. Waiting for the other party.
           </span>
         )}
@@ -86,7 +100,7 @@ export function SwapActions({ swap, onRefresh }: Props) {
         )}
 
         {swap.status === "COMPLETED" && (
-          <span className="text-sm text-green-600 font-medium py-2">
+          <span className="text-sm text-[var(--success)] font-medium font-[Outfit] py-2">
             Swap completed! Credits have been transferred.
           </span>
         )}

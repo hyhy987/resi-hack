@@ -45,19 +45,19 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
 
   return (
     <Modal open={open} onClose={onClose} title="Create Listing">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
             Type
           </label>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => setType("OFFER")}
-              className={`flex-1 py-2 rounded text-sm font-medium ${
+              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold font-[Outfit] transition-all cursor-pointer ${
                 type === "OFFER"
-                  ? "bg-green-100 text-green-700 border-2 border-green-400"
-                  : "bg-gray-50 text-gray-500 border border-gray-200"
+                  ? "bg-[var(--offer-green-bg)] text-[var(--offer-green)] border-2 border-[var(--offer-green)]/40 shadow-lg shadow-[var(--offer-green)]/5"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]"
               }`}
             >
               Offer Credits
@@ -65,10 +65,10 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
             <button
               type="button"
               onClick={() => setType("REQUEST")}
-              className={`flex-1 py-2 rounded text-sm font-medium ${
+              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold font-[Outfit] transition-all cursor-pointer ${
                 type === "REQUEST"
-                  ? "bg-blue-100 text-blue-700 border-2 border-blue-400"
-                  : "bg-gray-50 text-gray-500 border border-gray-200"
+                  ? "bg-[var(--request-blue-bg)] text-[var(--request-blue)] border-2 border-[var(--request-blue)]/40 shadow-lg shadow-[var(--request-blue)]/5"
+                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border border-[var(--border)]"
               }`}
             >
               Request Credits
@@ -77,7 +77,7 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
             Amount
           </label>
           <input
@@ -86,34 +86,36 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
             max="99"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="w-full px-3 py-2 text-sm"
+            placeholder="1-99"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Notes (optional)
+          <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
+            Notes <span className="normal-case font-normal">(optional)</span>
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+            className="w-full px-3 py-2 text-sm"
             rows={3}
             maxLength={500}
+            placeholder="Any details about this listing..."
           />
         </div>
 
         {error && (
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">{error}</p>
         )}
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <div className="flex justify-end gap-2 pt-1">
+          <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" disabled={submitting || !amount}>
-            {submitting ? "Creating..." : "Create"}
+            {submitting ? "Creating..." : "Create Listing"}
           </Button>
         </div>
       </form>
