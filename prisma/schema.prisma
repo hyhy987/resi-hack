@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String
+  email          String?
+  trackedCredits Int          @default(0)
+  contactHandle  String       @default("")
+  createdAt      DateTime     @default(now())
+  listings       Listing[]
+  proposedSwaps  Swap[]       @relation("proposer")
+  receivedSwaps  Swap[]       @relation("counterparty")
+  messages       SwapMessage[]
+}
+
+model Listing {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // OFFER or REQUEST
+  amount    Int
+  notes     String   @default("")
+  status    String   @default("ACTIVE") // ACTIVE, MATCHED, EXPIRED, CANCELLED
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  swaps     Swap[]
+}
+
+model Swap {
+  id               String       @id @default(cuid())
+  listingId        String
+  proposerId       String
+  counterpartyId   String
+  amount           Int
+  status           String       @default("PROPOSED") // PROPOSED, ACCEPTED, CONFIRMED_BY_GIVER, CONFIRMED_BY_RECEIVER, COMPLETED, CANCELLED
+  giverConfirmed   Boolean      @default(false)
+  receiverConfirmed Boolean     @default(false)
+  createdAt        DateTime     @default(now())
+  listing          Listing      @relation(fields: [listingId], references: [id])
+  proposer         User         @relation("proposer", fields: [proposerId], references: [id])
+  counterparty     User         @relation("counterparty", fields: [counterpartyId], references: [id])
+  messages         SwapMessage[]
+}
+
+model SwapMessage {
+  id        String   @id @default(cuid())
+  swapId    String
+  userId    String
+  message   String
+  createdAt DateTime @default(now())
+  swap      Swap     @relation(fields: [swapId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}

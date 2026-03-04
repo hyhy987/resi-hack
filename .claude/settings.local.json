@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(mv .claude:*)",
+      "Bash(npm install:*)",
+      "Bash(npm:*)",
+      "Bash(node:*)",
+      "Bash(\"/c/Program Files/nodejs/npm\" install:*)",
+      "Bash(COMSPEC=\"C:/Windows/System32/cmd.exe\" npm install:*)",
+      "Bash(export:*)",
+      "Bash(npx prisma:*)",
+      "Bash(curl:*)",
+      "Bash(ss:*)",
+      "Bash(npx ts-node:*)"
+    ]
+  }
+}
