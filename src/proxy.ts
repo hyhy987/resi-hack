@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const COOKIE_NAME = "creditswap-user-id";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const userId = request.cookies.get(COOKIE_NAME)?.value;
   const { pathname } = request.nextUrl;
 
