@@ -22,7 +22,7 @@ export function ListingsGrid({ listings = [] }: ListingsGridProps) {
       <div className="text-center py-20 animate-fade-in">
         <div className="text-4xl mb-3 opacity-20">{"\u2727"}</div>
         <p className="text-[var(--text-muted)] font-[Outfit] tracking-wide">
-          No listings found in your Hall
+          No listings found in your Dining Hall
         </p>
       </div>
     );

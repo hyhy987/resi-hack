@@ -17,6 +17,7 @@ export async function GET(
         select: {
           id: true,
           name: true,
+          nusId: true,
           contactHandle: true,
           trackedCredits: true,
         },

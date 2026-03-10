@@ -20,6 +20,7 @@ interface ListingDetail {
   user: {
     id: string;
     name: string;
+    nusId: string; // Added NUS ID
     contactHandle: string;
     trackedCredits: number;
   };
@@ -143,9 +144,11 @@ export default function ListingDetailPage() {
             <div className="flex items-baseline gap-2">
               <span
                 className={`text-5xl font-extrabold font-[Outfit] ${
-                  isOffer
-                    ? "text-[var(--offer-green)]"
-                    : "text-[var(--request-blue)]"
+                  isMine
+                    ? "text-[var(--text-primary)]"
+                    : isOffer
+                      ? "text-[var(--offer-green)]"
+                      : "text-[var(--request-blue)]"
                 }`}
               >
                 {listing.amount}
@@ -176,15 +179,14 @@ export default function ListingDetailPage() {
           </div>
         </div>
 
-        {/* Seller info + actions */}
+        {/* User info + actions */}
         <div className="lg:w-80 space-y-4">
-          {/* User card */}
           <div className="glass-card-static p-6 animate-fade-in-up stagger-2">
-            <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-4 font-[Outfit]">
-              {isOffer ? "Seller" : "Buyer"}
+            <h3 className="text-xs font-bold uppercase text-[var(--text-muted)] tracking-widest mb-4 font-[Outfit]">
+              {isOffer ? "Seller Identity" : "Buyer Identity"}
             </h3>
 
-            <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center gap-3 mb-6">
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold font-[Outfit] ${
                   isOffer
@@ -195,52 +197,61 @@ export default function ListingDetailPage() {
                 {listing.user.name.charAt(0)}
               </div>
               <div>
-                <p className="font-semibold font-[Outfit] text-[var(--text-primary)]">
+                <p className="font-bold font-[Outfit] text-[var(--text-primary)] leading-tight">
                   {listing.user.name}
                 </p>
-                <p className="text-xs text-[var(--text-muted)]">
-                  {listing.user.trackedCredits} credits available
+                <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-tighter">
+                  {listing.user.nusId || "No ID Linked"}
                 </p>
               </div>
             </div>
 
-            {/* Telegram handle */}
-            {listing.user.contactHandle && (
+            <div className="space-y-3">
               <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)]">
-                <p className="text-xs text-[var(--text-muted)] mb-1 font-[Outfit]">
-                  Telegram
+                <p className="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1 tracking-widest">
+                  {listing.user.name}'s credits
                 </p>
-                <a
-                  href={`https://t.me/${listing.user.contactHandle.replace("@", "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[var(--request-blue)] hover:text-[var(--accent)] transition-colors font-medium text-sm"
-                >
-                  {listing.user.contactHandle}
-                </a>
+                <p className="text-sm font-bold font-[Outfit] text-[var(--text-primary)]">
+                  {listing.user.trackedCredits}
+                </p>
               </div>
-            )}
+
+              {listing.user.contactHandle && (
+                <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)]">
+                  <p className="text-[10px] font-bold uppercase text-[var(--text-muted)] mb-1 tracking-widest">
+                    Telegram
+                  </p>
+                  <a
+                    href={`https://t.me/${listing.user.contactHandle.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--accent)] hover:underline transition-all font-bold text-sm"
+                  >
+                    {listing.user.contactHandle}
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Action card */}
           <div className="glass-card-static p-6 animate-fade-in-up stagger-3">
             {error && (
-              <p className="text-sm text-[var(--danger)] mb-3 p-2 rounded-lg bg-[var(--danger)]/10">
+              <p className="text-xs text-[var(--danger)] mb-4 p-2.5 rounded-xl bg-[var(--danger)]/10 border border-[var(--danger)]/20 font-medium">
                 {error}
               </p>
             )}
 
-            {/* Always prioritize viewing an existing swap if it exists */}
             {existingSwap ? (
               <div className="text-center">
-                <p className="text-sm text-[var(--text-secondary)] mb-3">
+                <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
                   {isMine
-                    ? "Someone has proposed a swap!"
-                    : "You have an active swap for this listing"}
+                    ? "Someone has proposed a swap! View the process to finalize."
+                    : "You have an active swap for this listing."}
                 </p>
                 <Button
                   variant="primary"
-                  className="w-full"
+                  className="w-full py-4 text-xs font-bold uppercase tracking-widest"
                   onClick={() => router.push(`/swap/${existingSwap.id}`)}
                 >
                   View Swap Process
@@ -250,14 +261,13 @@ export default function ListingDetailPage() {
               <>
                 {canPropose && (
                   <>
-                    <p className="text-sm text-[var(--text-secondary)] mb-4">
+                    <p className="text-xs text-[var(--text-secondary)] mb-5 leading-relaxed">
                       {isOffer
                         ? `${listing.user.name} is offering ${listing.amount} credits. Propose a swap to receive them.`
                         : `${listing.user.name} needs ${listing.amount} credits. Propose a swap to send them.`}
                     </p>
                     <Button
-                      className="w-full"
-                      size="lg"
+                      className="w-full py-5 text-sm font-bold uppercase tracking-widest"
                       onClick={handlePropose}
                       disabled={proposing}
                     >
@@ -267,20 +277,25 @@ export default function ListingDetailPage() {
                 )}
 
                 {isMine && (
-                  <p className="text-sm text-[var(--text-muted)] text-center">
-                    This is your listing. Waiting for a proposal...
-                  </p>
+                  <div className="text-center py-2">
+                    <p className="text-xs text-[var(--text-muted)] font-medium italic">
+                      This is your listing.
+                    </p>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-1">
+                      Waiting for a community proposal...
+                    </p>
+                  </div>
                 )}
 
                 {!currentUser && (
-                  <p className="text-sm text-[var(--text-muted)] text-center">
-                    Login to make an offer
+                  <p className="text-xs text-[var(--text-muted)] text-center font-medium">
+                    Please login to participate.
                   </p>
                 )}
 
                 {listing.status !== "ACTIVE" && !isMine && (
-                  <p className="text-sm text-[var(--text-muted)] text-center">
-                    This listing is no longer active
+                  <p className="text-xs text-[var(--text-muted)] text-center font-medium">
+                    This listing is no longer active.
                   </p>
                 )}
               </>
