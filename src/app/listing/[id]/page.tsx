@@ -17,8 +17,18 @@ interface ListingDetail {
   status: string;
   expiresAt: string;
   createdAt: string;
-  user: { id: string; name: string; contactHandle: string; trackedCredits: number };
-  swaps: { id: string; status: string; proposerId: string }[];
+  user: {
+    id: string;
+    name: string;
+    contactHandle: string;
+    trackedCredits: number;
+  };
+  swaps: {
+    id: string;
+    status: string;
+    proposerId: string;
+    counterpartyId: string;
+  }[];
 }
 
 export default function ListingDetailPage() {
@@ -56,7 +66,9 @@ export default function ListingDetailPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(typeof data.error === "string" ? data.error : "Failed to propose swap");
+      setError(
+        typeof data.error === "string" ? data.error : "Failed to propose swap",
+      );
       setProposing(false);
       return;
     }
@@ -78,7 +90,9 @@ export default function ListingDetailPage() {
   if (loading) {
     return (
       <PageContainer>
-        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">Loading...</div>
+        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">
+          Loading...
+        </div>
       </PageContainer>
     );
   }
@@ -86,7 +100,9 @@ export default function ListingDetailPage() {
   if (!listing) {
     return (
       <PageContainer>
-        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">Listing not found</div>
+        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">
+          Listing not found
+        </div>
       </PageContainer>
     );
   }
@@ -94,8 +110,12 @@ export default function ListingDetailPage() {
   const isOffer = listing.type === "OFFER";
   const isMine = currentUser?.id === listing.userId;
   const canPropose = listing.status === "ACTIVE" && currentUser && !isMine;
+
   const existingSwap = listing.swaps.find(
-    (s) => s.proposerId === currentUser?.id && s.status !== "CANCELLED"
+    (s) =>
+      (s.proposerId === currentUser?.id ||
+        s.counterpartyId === currentUser?.id) &&
+      s.status !== "CANCELLED",
   );
 
   return (
@@ -121,12 +141,18 @@ export default function ListingDetailPage() {
 
           <div className="mb-6">
             <div className="flex items-baseline gap-2">
-              <span className={`text-5xl font-extrabold font-[Outfit] ${
-                isOffer ? "text-[var(--offer-green)]" : "text-[var(--request-blue)]"
-              }`}>
+              <span
+                className={`text-5xl font-extrabold font-[Outfit] ${
+                  isOffer
+                    ? "text-[var(--offer-green)]"
+                    : "text-[var(--request-blue)]"
+                }`}
+              >
                 {listing.amount}
               </span>
-              <span className="text-lg text-[var(--text-muted)] font-[Outfit]">credits</span>
+              <span className="text-lg text-[var(--text-muted)] font-[Outfit]">
+                credits
+              </span>
             </div>
           </div>
 
@@ -135,14 +161,18 @@ export default function ListingDetailPage() {
               <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
                 Notes
               </h3>
-              <p className="text-[var(--text-secondary)] leading-relaxed">{listing.notes}</p>
+              <p className="text-[var(--text-secondary)] leading-relaxed">
+                {listing.notes}
+              </p>
             </div>
           )}
 
           <div className="flex items-center gap-4 text-sm text-[var(--text-muted)]">
             <span>{formatExpiry(listing.expiresAt)}</span>
             <span>&middot;</span>
-            <span>Posted {new Date(listing.createdAt).toLocaleDateString()}</span>
+            <span>
+              Posted {new Date(listing.createdAt).toLocaleDateString()}
+            </span>
           </div>
         </div>
 
@@ -155,11 +185,13 @@ export default function ListingDetailPage() {
             </h3>
 
             <div className="flex items-center gap-3 mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold font-[Outfit] ${
-                isOffer
-                  ? "bg-[var(--offer-green-bg)] text-[var(--offer-green)]"
-                  : "bg-[var(--request-blue-bg)] text-[var(--request-blue)]"
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold font-[Outfit] ${
+                  isOffer
+                    ? "bg-[var(--offer-green-bg)] text-[var(--offer-green)]"
+                    : "bg-[var(--request-blue-bg)] text-[var(--request-blue)]"
+                }`}
+              >
                 {listing.user.name.charAt(0)}
               </div>
               <div>
@@ -175,7 +207,9 @@ export default function ListingDetailPage() {
             {/* Telegram handle */}
             {listing.user.contactHandle && (
               <div className="p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)]">
-                <p className="text-xs text-[var(--text-muted)] mb-1 font-[Outfit]">Telegram</p>
+                <p className="text-xs text-[var(--text-muted)] mb-1 font-[Outfit]">
+                  Telegram
+                </p>
                 <a
                   href={`https://t.me/${listing.user.contactHandle.replace("@", "")}`}
                   target="_blank"
@@ -196,55 +230,60 @@ export default function ListingDetailPage() {
               </p>
             )}
 
-            {canPropose && !existingSwap && (
-              <>
-                <p className="text-sm text-[var(--text-secondary)] mb-4">
-                  {isOffer
-                    ? `${listing.user.name} is offering ${listing.amount} credits. Propose a swap to receive them.`
-                    : `${listing.user.name} needs ${listing.amount} credits. Propose a swap to send them.`}
-                </p>
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handlePropose}
-                  disabled={proposing}
-                >
-                  {proposing ? "Proposing..." : "Propose Swap"}
-                </Button>
-              </>
-            )}
-
-            {existingSwap && (
+            {/* Always prioritize viewing an existing swap if it exists */}
+            {existingSwap ? (
               <div className="text-center">
                 <p className="text-sm text-[var(--text-secondary)] mb-3">
-                  You already have a swap for this listing
+                  {isMine
+                    ? "Someone has proposed a swap!"
+                    : "You have an active swap for this listing"}
                 </p>
                 <Button
-                  variant="secondary"
+                  variant="primary"
                   className="w-full"
                   onClick={() => router.push(`/swap/${existingSwap.id}`)}
                 >
-                  View Swap
+                  View Swap Process
                 </Button>
               </div>
-            )}
+            ) : (
+              <>
+                {canPropose && (
+                  <>
+                    <p className="text-sm text-[var(--text-secondary)] mb-4">
+                      {isOffer
+                        ? `${listing.user.name} is offering ${listing.amount} credits. Propose a swap to receive them.`
+                        : `${listing.user.name} needs ${listing.amount} credits. Propose a swap to send them.`}
+                    </p>
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      onClick={handlePropose}
+                      disabled={proposing}
+                    >
+                      {proposing ? "Proposing..." : "Propose Swap"}
+                    </Button>
+                  </>
+                )}
 
-            {isMine && (
-              <p className="text-sm text-[var(--text-muted)] text-center">
-                This is your listing
-              </p>
-            )}
+                {isMine && (
+                  <p className="text-sm text-[var(--text-muted)] text-center">
+                    This is your listing. Waiting for a proposal...
+                  </p>
+                )}
 
-            {!currentUser && (
-              <p className="text-sm text-[var(--text-muted)] text-center">
-                Select a user to make an offer
-              </p>
-            )}
+                {!currentUser && (
+                  <p className="text-sm text-[var(--text-muted)] text-center">
+                    Login to make an offer
+                  </p>
+                )}
 
-            {listing.status !== "ACTIVE" && !existingSwap && !isMine && (
-              <p className="text-sm text-[var(--text-muted)] text-center">
-                This listing is no longer active
-              </p>
+                {listing.status !== "ACTIVE" && !isMine && (
+                  <p className="text-sm text-[var(--text-muted)] text-center">
+                    This listing is no longer active
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
