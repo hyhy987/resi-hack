@@ -1,0 +1,178 @@
+"use client";
+
+import Link from "next/link";
+import { ListingData, SwapData, SwapStatus } from "@/types";
+import { Badge } from "@/components/ui/Badge";
+import { useAuth } from "@/providers/AuthProvider";
+
+// Define exactly what the card expects, including the nested names from our API update
+interface ListingCardProps {
+  listing: ListingData & {
+    swaps?: (SwapData & {
+      proposer: { name: string };
+      counterparty: { name: string };
+    })[];
+  };
+  index: number;
+}
+
+export function ListingCard({ listing, index }: ListingCardProps) {
+  const { currentUser } = useAuth();
+  const l = listing;
+
+  const formatExpiry = (expiresAt: string) => {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return "Expired";
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
+
+  const getSwapStatusLabel = (status: SwapStatus): string => {
+    switch (status) {
+      case "PROPOSED":
+        return "Proposed";
+      case "ACCEPTED":
+        return "Accepted";
+      case "CONFIRMED_BY_GIVER":
+      case "CONFIRMED_BY_RECEIVER":
+        return "Confirming";
+      case "COMPLETED":
+        return "Completed";
+      case "CANCELLED":
+        return "Cancelled";
+      default:
+        return "";
+    }
+  };
+
+  const isOffer = l.type === "OFFER";
+  const isMine = currentUser?.id === l.userId;
+  const mySwap = l.swaps?.length ? l.swaps[0] : null;
+  const isActiveSwap =
+    mySwap && !["COMPLETED", "CANCELLED"].includes(mySwap.status);
+  const isProposer = !isMine && !!mySwap;
+
+  // Identity logic
+  let displayName = "";
+  let showAvatar = false;
+  if (mySwap) {
+    if (isMine) {
+      displayName = mySwap.proposer.name;
+      showAvatar = true;
+    } else if (isProposer && mySwap.status !== "PROPOSED") {
+      displayName = mySwap.counterparty.name;
+      showAvatar = true;
+    }
+  } else if (!isMine) {
+    displayName = l.user.name;
+    showAvatar = true;
+  }
+
+  // Action logic
+  let hasActionItem = false;
+  if (mySwap && currentUser && isActiveSwap) {
+    const isGiver =
+      (l.type === "OFFER" && isMine) || (l.type === "REQUEST" && isProposer);
+    const isReceiver =
+      (l.type === "OFFER" && isProposer) || (l.type === "REQUEST" && isMine);
+    if (
+      mySwap.status === "PROPOSED" &&
+      currentUser.id === mySwap.counterpartyId
+    ) {
+      hasActionItem = true;
+    } else if (
+      ["ACCEPTED", "CONFIRMED_BY_GIVER", "CONFIRMED_BY_RECEIVER"].includes(
+        mySwap.status,
+      )
+    ) {
+      if (
+        (isGiver && !mySwap.giverConfirmed) ||
+        (isReceiver && !mySwap.receiverConfirmed)
+      ) {
+        hasActionItem = true;
+      }
+    }
+  }
+
+  const statusLabel = mySwap ? getSwapStatusLabel(mySwap.status) : null;
+  const href = isActiveSwap ? `/swap/${mySwap.id}` : `/listing/${l.id}`;
+
+  return (
+    <Link
+      href={href}
+      className={`glass-card p-4 flex flex-col group relative overflow-hidden transition-all duration-300 hover:border-[var(--accent)]/50 animate-fade-in-up stagger-${Math.min(index + 1, 8)} ${isMine ? "border-l-4 border-l-[var(--accent)]" : ""} ${hasActionItem ? "ring-1 ring-[var(--accent)]/40" : ""}`}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex gap-1.5">
+          <Badge color={isOffer ? "green" : "blue"}>
+            {isOffer ? "OFFERING" : "REQUESTING"}
+          </Badge>
+          {isMine && <Badge color="accent">OWNER</Badge>}
+          {isProposer && <Badge color="purple">PROPOSED</Badge>}
+        </div>
+      </div>
+
+      <div className="mb-2">
+        <div className="flex items-baseline gap-1">
+          <span
+            className={`text-3xl font-black font-[Outfit] tracking-tight ${isOffer ? "text-[var(--offer-green)]" : "text-[var(--request-blue)]"}`}
+          >
+            {l.amount}
+          </span>
+          <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-tighter">
+            credits
+          </span>
+        </div>
+      </div>
+
+      <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-snug">
+        {l.notes || (
+          <span className="italic opacity-40">No notes provided</span>
+        )}
+      </p>
+
+      <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2">
+          {showAvatar && (
+            <div
+              className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold font-[Outfit] ${isOffer ? "bg-[var(--offer-green-bg)] text-[var(--offer-green)]" : "bg-[var(--request-blue-bg)] text-[var(--request-blue)]"}`}
+            >
+              {displayName.charAt(0)}
+            </div>
+          )}
+          <span className="text-[11px] font-medium text-[var(--text-secondary)]">
+            {displayName}
+          </span>
+        </div>
+
+        <div className="text-right">
+          <span className="text-[9px] block text-[var(--text-muted)] uppercase font-bold tracking-tight">
+            {statusLabel
+              ? "Swap Stage"
+              : l.status === "ACTIVE"
+                ? "Expires"
+                : "Status"}
+          </span>
+          <div className="flex items-center justify-end gap-1">
+            {hasActionItem && (
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute h-full w-full rounded-full bg-[var(--accent)] opacity-75"></span>
+                <span className="relative rounded-full h-1.5 w-1.5 bg-[var(--accent)]"></span>
+              </span>
+            )}
+            <span
+              className={`text-[11px] font-bold font-[Outfit] ${statusLabel ? "text-[var(--accent)]" : "text-[var(--text-primary)]"}`}
+            >
+              {statusLabel ||
+                (l.status === "ACTIVE"
+                  ? formatExpiry(l.expiresAt)
+                  : l.status.toLowerCase())}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+    </Link>
+  );
+}

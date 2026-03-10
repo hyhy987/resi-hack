@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAX_CREDITS } from "./constants";
+import { MAX_CREDITS, DINING_HALLS } from "./constants";
 
 export const createListingSchema = z.object({
   type: z.enum(["OFFER", "REQUEST"]),
@@ -19,5 +19,6 @@ export const sendMessageSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   contactHandle: z.string().max(100).optional(),
+  diningHall: z.enum(DINING_HALLS),
   trackedCredits: z.number().int().min(0).max(MAX_CREDITS).optional(),
 });

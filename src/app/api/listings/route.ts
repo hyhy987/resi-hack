@@ -3,11 +3,31 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createListingSchema } from "@/lib/validations";
 import { MAX_DAILY_LISTINGS, EXPIRY_HOURS } from "@/lib/constants";
+import { Prisma } from "@prisma/client";
+import { z } from "zod";
 
 export async function GET(req: NextRequest) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
-  const type = searchParams.get("type");
-  const userId = searchParams.get("userId");
+
+  const typeResult = z
+    .enum(["OFFER", "REQUEST"])
+    .nullable()
+    .safeParse(searchParams.get("type"));
+
+  if (!typeResult.success) {
+    return NextResponse.json(
+      { error: "Invalid type parameter" },
+      { status: 400 },
+    );
+  }
+
+  const type = typeResult.data;
+  const userIdParam = searchParams.get("userId");
 
   const now = new Date();
 
@@ -17,39 +37,62 @@ export async function GET(req: NextRequest) {
     data: { status: "EXPIRED" },
   });
 
-  // Default filter for general browsing
-  let where: any = { status: "ACTIVE" };
+  let where: Prisma.ListingWhereInput = {};
 
-  if (userId) {
-    /**
-     * Listings I created (any status)
-     * OR
-     * Listings where I have proposed a swap
-     */
+  if (userIdParam) {
     where = {
       OR: [
-        { userId: userId },
+        { userId: userIdParam },
         {
           swaps: {
             some: {
-              proposerId: userId,
+              OR: [
+                { proposerId: userIdParam },
+                { counterpartyId: userIdParam },
+              ],
             },
           },
         },
       ],
     };
-  } else if (type) {
-    where.type = type;
+  } else {
+    where = {
+      status: "ACTIVE",
+      user: {
+        diningHall: user.diningHall,
+      },
+    };
+
+    if (type) {
+      where.type = type;
+    }
   }
 
   const listings = await db.listing.findMany({
     where,
     include: {
-      user: { select: { id: true, name: true } },
-      // Include swaps so the frontend can show "Proposed" status badges
+      user: {
+        select: {
+          id: true,
+          name: true,
+          diningHall: true,
+        },
+      },
       swaps: {
-        where: userId ? { proposerId: userId } : undefined,
-        select: { id: true, status: true },
+        where: {
+          OR: [{ proposerId: user.id }, { counterpartyId: user.id }],
+        },
+        select: {
+          id: true,
+          status: true,
+          giverConfirmed: true,
+          receiverConfirmed: true,
+          proposerId: true,
+          counterpartyId: true,
+          // --- ADDED: Fetch names for both sides ---
+          proposer: { select: { name: true } },
+          counterparty: { select: { name: true } },
+        },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -73,7 +116,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Rate limit: max listings per day
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   const todayCount = await db.listing.count({
@@ -96,7 +138,7 @@ export async function POST(req: NextRequest) {
       notes: parsed.data.notes || "",
       expiresAt,
     },
-    include: { user: { select: { id: true, name: true } } },
+    include: { user: { select: { id: true, name: true, diningHall: true } } },
   });
 
   return NextResponse.json(listing, { status: 201 });

@@ -6,9 +6,21 @@ const COOKIE_NAME = "creditswap-user-id";
 export async function getCurrentUser() {
   const cookieStore = await cookies();
   const userId = cookieStore.get(COOKIE_NAME)?.value;
+
   if (!userId) return null;
 
-  const user = await db.user.findUnique({ where: { id: userId } });
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      NUSID: true,
+      diningHall: true,
+      trackedCredits: true,
+      contactHandle: true,
+    },
+  });
+
   return user;
 }
 
