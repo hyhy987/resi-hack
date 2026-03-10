@@ -200,9 +200,6 @@ export default function ListingDetailPage() {
                 <p className="font-bold font-[Outfit] text-[var(--text-primary)] leading-tight">
                   {listing.user.name}
                 </p>
-                <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-tighter">
-                  {listing.user.nusId || "No ID Linked"}
-                </p>
               </div>
             </div>
 

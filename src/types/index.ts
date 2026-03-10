@@ -39,8 +39,18 @@ export interface SwapData {
   receiverConfirmed: boolean;
   createdAt: string;
   listing: { id: string; type: ListingType; amount: number; notes: string };
-  proposer: { id: string; name: string };
-  counterparty: { id: string; name: string };
+  proposer: {
+    id: string;
+    name: string;
+    nusId?: string;
+    contactHandle?: string;
+  };
+  counterparty: {
+    id: string;
+    name: string;
+    nusId?: string;
+    contactHandle?: string;
+  };
   messages: SwapMessageData[];
 }
 

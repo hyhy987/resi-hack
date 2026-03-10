@@ -11,10 +11,10 @@ export default function ProfilePage() {
           Profile
         </h1>
         <p className="text-[var(--text-secondary)]">
-          Manage your name, contact details, and credit balance.
+          Manage your name, contact details and credit balance.
         </p>
       </div>
-      <div className="glass-card-static p-8 max-w-lg animate-fade-in-up stagger-2">
+      <div className="glass-card-static p-8 max-w-lg mx-auto animate-fade-in-up stagger-2">
         <ProfileForm />
       </div>
     </PageContainer>

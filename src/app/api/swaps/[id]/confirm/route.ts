@@ -10,9 +10,8 @@ export async function POST(
 ) {
   const { id } = await params;
   const user = await getCurrentUser();
-  if (!user) {
+  if (!user)
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
   try {
     const result = await db.$transaction(async (tx) => {
@@ -23,50 +22,44 @@ export async function POST(
 
       if (!swap) throw new Error("Swap not found");
 
-      if (
-        swap.status !== "ACCEPTED" &&
-        swap.status !== "CONFIRMED_BY_GIVER" &&
-        swap.status !== "CONFIRMED_BY_RECEIVER"
-      ) {
+      // Validating stages for confirmation
+      const validStages = [
+        "ACCEPTED",
+        "CONFIRMED_BY_GIVER",
+        "CONFIRMED_BY_RECEIVER",
+      ];
+      if (!validStages.includes(swap.status)) {
         throw new Error("Swap must be accepted before confirming");
       }
 
+      // Logic: Giver is the one losing credits
+      // If OFFER: Owner (counterparty) is giver. If REQUEST: Proposer is giver.
       const isGiver =
         (swap.listing.type === "OFFER" && swap.counterpartyId === user.id) ||
         (swap.listing.type === "REQUEST" && swap.proposerId === user.id);
-      const isReceiver =
-        (swap.listing.type === "OFFER" && swap.proposerId === user.id) ||
-        (swap.listing.type === "REQUEST" && swap.counterpartyId === user.id);
 
-      if (!isGiver && !isReceiver) {
-        throw new Error("You are not part of this swap");
-      }
+      const isReceiver =
+        !isGiver &&
+        (swap.proposerId === user.id || swap.counterpartyId === user.id);
+
+      if (!isGiver && !isReceiver) throw new Error("Not authorized");
 
       const updateData: Prisma.SwapUpdateInput = {};
 
       if (isGiver) {
-        if (swap.giverConfirmed) throw new Error("Already confirmed as giver");
+        if (swap.giverConfirmed) throw new Error("Already confirmed");
         updateData.giverConfirmed = true;
       } else {
-        if (swap.receiverConfirmed)
-          throw new Error("Already confirmed as receiver");
+        if (swap.receiverConfirmed) throw new Error("Already confirmed");
         updateData.receiverConfirmed = true;
       }
 
-      const currentSwap = await tx.swap.findUnique({
-        where: { id },
-        include: { listing: true },
-      });
+      // Check if this confirmation completes the swap
+      const willBeBothConfirmed =
+        (isGiver && swap.receiverConfirmed) ||
+        (isReceiver && swap.giverConfirmed);
 
-      if (!currentSwap) {
-        throw new Error("Swap not found or was deleted.");
-      }
-
-      const bothConfirmed =
-        (isGiver && currentSwap.receiverConfirmed) ||
-        (isReceiver && currentSwap.giverConfirmed);
-
-      if (bothConfirmed) {
+      if (willBeBothConfirmed) {
         const giverId =
           swap.listing.type === "OFFER" ? swap.counterpartyId : swap.proposerId;
         const receiverId =
@@ -77,39 +70,41 @@ export async function POST(
           where: { id: receiverId },
         });
 
-        if (!giver || !receiver) throw new Error("User not found");
-        if (giver.trackedCredits < swap.amount) {
-          throw new Error("Giver doesn't have enough credits");
-        }
-        if (receiver.trackedCredits + swap.amount > MAX_CREDITS) {
-          throw new Error("Receiver would exceed max credits");
-        }
+        if (!giver || !receiver) throw new Error("Users not found");
+        if (giver.trackedCredits < swap.amount)
+          throw new Error("Insufficient credits in Giver account");
 
+        // Atomic Credit Swap
         await tx.user.update({
           where: { id: giverId },
-          data: { trackedCredits: giver.trackedCredits - swap.amount },
+          data: { trackedCredits: { decrement: swap.amount } },
         });
         await tx.user.update({
           where: { id: receiverId },
-          data: { trackedCredits: receiver.trackedCredits + swap.amount },
+          data: { trackedCredits: { increment: swap.amount } },
         });
 
         updateData.status = "COMPLETED";
+
+        // System message for the log
+        await tx.swapMessage.create({
+          data: {
+            swapId: id,
+            userId: user.id, // Or a system user ID if you have one
+            message: `Swap completed! ${swap.amount} credits transferred successfully.`,
+          },
+        });
       } else {
         updateData.status = isGiver
           ? "CONFIRMED_BY_GIVER"
           : "CONFIRMED_BY_RECEIVER";
       }
 
-      return tx.swap.update({
-        where: { id },
-        data: updateData,
-      });
+      return tx.swap.update({ where: { id }, data: updateData });
     });
 
     return NextResponse.json(result);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 400 });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 400 });
   }
 }
