@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { MAX_CREDITS } from "@/lib/constants";
+import { Prisma } from "@prisma/client";
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const user = await getCurrentUser();
@@ -22,7 +23,11 @@ export async function POST(
 
       if (!swap) throw new Error("Swap not found");
 
-      if (swap.status !== "ACCEPTED" && swap.status !== "CONFIRMED_BY_GIVER" && swap.status !== "CONFIRMED_BY_RECEIVER") {
+      if (
+        swap.status !== "ACCEPTED" &&
+        swap.status !== "CONFIRMED_BY_GIVER" &&
+        swap.status !== "CONFIRMED_BY_RECEIVER"
+      ) {
         throw new Error("Swap must be accepted before confirming");
       }
 
@@ -37,32 +42,40 @@ export async function POST(
         throw new Error("You are not part of this swap");
       }
 
-      const updateData: Record<string, unknown> = {};
+      const updateData: Prisma.SwapUpdateInput = {};
 
       if (isGiver) {
         if (swap.giverConfirmed) throw new Error("Already confirmed as giver");
         updateData.giverConfirmed = true;
       } else {
-        if (swap.receiverConfirmed) throw new Error("Already confirmed as receiver");
+        if (swap.receiverConfirmed)
+          throw new Error("Already confirmed as receiver");
         updateData.receiverConfirmed = true;
       }
 
+      const currentSwap = await tx.swap.findUnique({
+        where: { id },
+        include: { listing: true },
+      });
+
+      if (!currentSwap) {
+        throw new Error("Swap not found or was deleted.");
+      }
+
       const bothConfirmed =
-        (isGiver && swap.receiverConfirmed) ||
-        (isReceiver && swap.giverConfirmed);
+        (isGiver && currentSwap.receiverConfirmed) ||
+        (isReceiver && currentSwap.giverConfirmed);
 
       if (bothConfirmed) {
         const giverId =
-          swap.listing.type === "OFFER"
-            ? swap.counterpartyId
-            : swap.proposerId;
+          swap.listing.type === "OFFER" ? swap.counterpartyId : swap.proposerId;
         const receiverId =
-          swap.listing.type === "OFFER"
-            ? swap.proposerId
-            : swap.counterpartyId;
+          swap.listing.type === "OFFER" ? swap.proposerId : swap.counterpartyId;
 
         const giver = await tx.user.findUnique({ where: { id: giverId } });
-        const receiver = await tx.user.findUnique({ where: { id: receiverId } });
+        const receiver = await tx.user.findUnique({
+          where: { id: receiverId },
+        });
 
         if (!giver || !receiver) throw new Error("User not found");
         if (giver.trackedCredits < swap.amount) {
@@ -83,7 +96,9 @@ export async function POST(
 
         updateData.status = "COMPLETED";
       } else {
-        updateData.status = isGiver ? "CONFIRMED_BY_GIVER" : "CONFIRMED_BY_RECEIVER";
+        updateData.status = isGiver
+          ? "CONFIRMED_BY_GIVER"
+          : "CONFIRMED_BY_RECEIVER";
       }
 
       return tx.swap.update({
