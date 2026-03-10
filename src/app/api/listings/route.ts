@@ -17,17 +17,41 @@ export async function GET(req: NextRequest) {
     data: { status: "EXPIRED" },
   });
 
-  const where: Record<string, unknown> = { status: "ACTIVE" };
-  if (type) where.type = type;
+  // Default filter for general browsing
+  let where: any = { status: "ACTIVE" };
+
   if (userId) {
-    // For "My Listings", show all statuses
-    delete where.status;
-    where.userId = userId;
+    /**
+     * Listings I created (any status)
+     * OR
+     * Listings where I have proposed a swap
+     */
+    where = {
+      OR: [
+        { userId: userId },
+        {
+          swaps: {
+            some: {
+              proposerId: userId,
+            },
+          },
+        },
+      ],
+    };
+  } else if (type) {
+    where.type = type;
   }
 
   const listings = await db.listing.findMany({
     where,
-    include: { user: { select: { id: true, name: true } } },
+    include: {
+      user: { select: { id: true, name: true } },
+      // Include swaps so the frontend can show "Proposed" status badges
+      swaps: {
+        where: userId ? { proposerId: userId } : undefined,
+        select: { id: true, status: true },
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -45,7 +69,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -58,7 +82,7 @@ export async function POST(req: NextRequest) {
   if (todayCount >= MAX_DAILY_LISTINGS) {
     return NextResponse.json(
       { error: `Max ${MAX_DAILY_LISTINGS} listings per day` },
-      { status: 429 }
+      { status: 429 },
     );
   }
 
