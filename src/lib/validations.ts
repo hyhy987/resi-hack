@@ -20,5 +20,11 @@ export const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   contactHandle: z.string().max(100).optional(),
   diningHall: z.enum(DINING_HALLS),
+  nusId: z
+    .string()
+    .regex(
+      /^E\d{7}$/,
+      "Invalid format. Use E followed by 7 digits (e.g. E1234567)",
+    ),
   trackedCredits: z.number().int().min(0).max(MAX_CREDITS).optional(),
 });

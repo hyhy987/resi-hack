@@ -30,7 +30,11 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(typeof data.error === "string" ? data.error : "Failed to create listing");
+      setError(
+        typeof data.error === "string"
+          ? data.error
+          : "Failed to create listing",
+      );
       setSubmitting(false);
       return;
     }
@@ -83,11 +87,11 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
           <input
             type="number"
             min="1"
-            max="99"
+            max="200"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="w-full px-3 py-2 text-sm"
-            placeholder="1-99"
+            placeholder="1-200"
             required
           />
         </div>
@@ -107,7 +111,9 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
         </div>
 
         {error && (
-          <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">{error}</p>
+          <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">
+            {error}
+          </p>
         )}
 
         <div className="flex justify-end gap-2 pt-1">

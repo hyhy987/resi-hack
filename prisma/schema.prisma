@@ -10,7 +10,7 @@ datasource db {
 model User {
   id             String       @id @default(cuid())
   name           String
-  NUSID          String       
+  nusId          String       
   diningHall     String       
   trackedCredits Int          @default(0)
   contactHandle  String       @default("")

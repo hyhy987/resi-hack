@@ -2,7 +2,7 @@
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
-    "NUSID" TEXT,
+    "nusId" TEXT,
     "diningHall" TEXT,
     "trackedCredits" INTEGER NOT NULL DEFAULT 0,
     "contactHandle" TEXT NOT NULL DEFAULT '',

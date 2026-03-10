@@ -14,7 +14,7 @@ export async function getCurrentUser() {
     select: {
       id: true,
       name: true,
-      NUSID: true,
+      nusId: true,
       diningHall: true,
       trackedCredits: true,
       contactHandle: true,
