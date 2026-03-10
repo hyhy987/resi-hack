@@ -6,7 +6,7 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { SwapTimeline } from "@/components/swaps/SwapTimeline";
 import { SwapActions } from "@/components/swaps/SwapActions";
 import { SwapMessages } from "@/components/swaps/SwapMessages";
-import { Badge, statusColor } from "@/components/ui/Badge";
+import { SwapInstructions } from "@/components/swaps/SwapInstructions";
 import { SwapData } from "@/types";
 import { useAuth } from "@/providers/AuthProvider";
 import Link from "next/link";
@@ -30,7 +30,7 @@ export default function SwapDetailPage() {
     fetchSwap();
   }, [fetchSwap]);
 
-  if (loading) {
+  if (loading)
     return (
       <PageContainer>
         <div className="text-center py-20 animate-fade-in">
@@ -38,9 +38,7 @@ export default function SwapDetailPage() {
         </div>
       </PageContainer>
     );
-  }
-
-  if (!swap) {
+  if (!swap)
     return (
       <PageContainer>
         <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">
@@ -48,9 +46,7 @@ export default function SwapDetailPage() {
         </div>
       </PageContainer>
     );
-  }
 
-  // Determine roles
   const isGiver =
     (swap.listing.type === "OFFER" &&
       currentUser?.id === swap.counterpartyId) ||
@@ -71,14 +67,10 @@ export default function SwapDetailPage() {
       </div>
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-fade-in-up">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-extrabold font-[Outfit] text-[var(--text-primary)] tracking-tight">
-            Swap Details
-          </h1>
-          <Badge color={statusColor(swap.status)}>{swap.status}</Badge>
-        </div>
+        <h1 className="text-3xl font-extrabold font-[Outfit] text-[var(--text-primary)] tracking-tight">
+          Swap Details
+        </h1>
 
-        {/* Simple Telegram Contact Pill */}
         {partner.contactHandle && (
           <div className="flex items-center gap-3 bg-[var(--bg-input)] border border-[var(--border-subtle)] px-4 py-2 rounded-2xl">
             <div className="text-right">
@@ -111,71 +103,58 @@ export default function SwapDetailPage() {
         )}
       </div>
 
-      <div className="flex gap-6 flex-col lg:flex-row">
-        {/* Left: Timeline & Manual Instructions */}
-        <div className="lg:w-1/3 space-y-6">
-          <div className="glass-card-static p-6 animate-fade-in-up stagger-1">
-            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-5 font-[Outfit]">
-              Progress
-            </h2>
-            <SwapTimeline swap={swap} />
-          </div>
-
-          {/* Instruction Block - only shows for Giver when Accepted */}
-          {isGiver && swap.status === "ACCEPTED" && (
-            <div className="glass-card-static p-6 border-l-4 border-l-[var(--accent)] animate-fade-in-up">
-              <h2 className="text-xs font-bold text-[var(--accent)] uppercase tracking-widest mb-4 font-[Outfit]">
-                Transfer Instructions
+      <div className="space-y-6">
+        {/* ROW 1: Progress & Actions */}
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+          <div className="lg:w-1/3 flex">
+            <div className="glass-card-static p-6 flex-1 flex flex-col">
+              <h2 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-6 font-[Outfit]">
+                Progress
               </h2>
-              <div className="space-y-4 text-[11px] leading-relaxed text-[var(--text-secondary)] font-medium">
-                <p>
-                  1. Open{" "}
-                  <span className="text-[var(--text-primary)]">
-                    NUS Dining Hall
-                  </span>{" "}
-                  app
-                </p>
-                <p>
-                  2. Click{" "}
-                  <span className="text-[var(--text-primary)]">
-                    Transfer Credits
-                  </span>{" "}
-                  icon (top-right)
-                </p>
-                <div className="p-3 bg-[var(--bg-input)] rounded-xl border border-[var(--border-subtle)]">
-                  <p className="text-[9px] text-[var(--text-muted)] mb-1 uppercase">
-                    Search NUS ID
-                  </p>
-                  <p className="text-sm font-mono font-bold text-[var(--accent)]">
-                    {partner.nusId || "E-------"}
-                  </p>
-                </div>
-                <p>
-                  3. Transfer exactly{" "}
-                  <span className="text-[var(--text-primary)] font-bold">
-                    {swap.amount} credits
-                  </span>
-                </p>
+              <div className="flex-1 flex flex-col justify-center">
+                <SwapTimeline swap={swap} />
               </div>
             </div>
-          )}
+          </div>
+          <div className="lg:w-2/3 flex">
+            <div className="glass-card-static p-6 flex-1">
+              <h2 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-6 font-[Outfit]">
+                Actions
+              </h2>
+              <SwapActions swap={swap} onRefresh={fetchSwap} />
+            </div>
+          </div>
         </div>
 
-        {/* Right: Actions + Messages */}
-        <div className="lg:w-2/3 space-y-6">
-          <div className="glass-card-static p-6 animate-fade-in-up stagger-2">
-            <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-5 font-[Outfit]">
-              Actions
-            </h2>
-            <SwapActions swap={swap} onRefresh={fetchSwap} />
+        {/* ROW 2: Instructions & Messages */}
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+          <div className="lg:w-1/3 flex">
+            <div className="flex-1">
+              {isGiver && swap.status === "ACCEPTED" ? (
+                <SwapInstructions swap={swap} partner={partner} />
+              ) : (
+                <div className="glass-card-static p-6 h-full flex flex-col items-center justify-center border-dashed border-2 border-[var(--border)] opacity-40">
+                  <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
+                    Instructions pending
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-
-          <div className="glass-card-static p-6 animate-fade-in-up stagger-3">
-            <SwapMessages
-              swapId={swap.id}
-              messages={swap.messages}
-              onRefresh={fetchSwap}
-            />
+          <div className="lg:w-2/3 flex">
+            {/* THIS IS THE BOX THAT WAS CENTERED - added flex-col */}
+            <div className="glass-card-static p-6 flex-1 flex flex-col overflow-hidden">
+              <h2 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest mb-6 font-[Outfit]">
+                Messages
+              </h2>
+              <div className="flex-1 overflow-hidden">
+                <SwapMessages
+                  swapId={swap.id}
+                  messages={swap.messages}
+                  onRefresh={fetchSwap}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

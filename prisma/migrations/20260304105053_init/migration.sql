@@ -4,7 +4,8 @@ CREATE TABLE "User" (
     "name" TEXT NOT NULL,
     "nusId" TEXT,
     "diningHall" TEXT,
-    "trackedCredits" INTEGER NOT NULL DEFAULT 0,
+    "breakfastCredits" INTEGER NOT NULL DEFAULT 0,
+    "dinnerCredits" INTEGER NOT NULL DEFAULT 0,
     "contactHandle" TEXT NOT NULL DEFAULT '',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -14,6 +15,7 @@ CREATE TABLE "Listing" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "userId" TEXT NOT NULL,
     "type" TEXT NOT NULL,
+    "creditType" TEXT NOT NULL, 
     "amount" INTEGER NOT NULL,
     "notes" TEXT NOT NULL DEFAULT '',
     "status" TEXT NOT NULL DEFAULT 'ACTIVE',

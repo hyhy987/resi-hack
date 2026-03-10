@@ -15,7 +15,8 @@ async function main() {
       name: "Alice",
       diningHall: "RVRC" as DiningHall,
       nusId: "E1430273",
-      trackedCredits: 45,
+      breakfastCredits: 45,
+      dinnerCredits: 45,
       contactHandle: "@alice_tele",
     },
   });
@@ -26,7 +27,8 @@ async function main() {
       name: "Bob",
       diningHall: "RVRC" as DiningHall,
       nusId: "E1837291",
-      trackedCredits: 20,
+      breakfastCredits: 20,
+      dinnerCredits: 20,
       contactHandle: "@bob_tele",
     },
   });
@@ -37,7 +39,8 @@ async function main() {
       name: "Charlie",
       diningHall: "RVRC" as DiningHall,
       nusId: "E1038391",
-      trackedCredits: 72,
+      breakfastCredits: 72,
+      dinnerCredits: 72,
       contactHandle: "@charlie_tele",
     },
   });
@@ -48,7 +51,8 @@ async function main() {
       name: "David",
       diningHall: "Cendana" as DiningHall,
       nusId: "E1182743",
-      trackedCredits: 50,
+      breakfastCredits: 50,
+      dinnerCredits: 50,
       contactHandle: "@david_tele",
     },
   });

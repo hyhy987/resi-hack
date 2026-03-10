@@ -11,7 +11,7 @@ export async function GET(
     where: { id },
     include: {
       listing: {
-        select: { id: true, type: true, amount: true, notes: true },
+        select: { id: true, type: true, creditType: true, amount: true, notes: true },
       },
       proposer: {
         select: { id: true, name: true, nusId: true, contactHandle: true },

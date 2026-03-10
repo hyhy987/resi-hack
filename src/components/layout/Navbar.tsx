@@ -42,21 +42,38 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* --- DUAL CREDIT DISPLAY --- */}
           {currentUser && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--accent-glow)] border border-[var(--accent)]/20">
-              <span className="text-xs text-[var(--text-secondary)]">Credits</span>
-              <span className="text-sm font-bold font-[Outfit] text-[var(--accent)]">
-                {currentUser.trackedCredits}
-              </span>
+            <div className="hidden md:flex items-center gap-2">
+              {/* Breakfast Pill */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                <span className="text-[10px]" title="Breakfast">
+                  Breakfast:
+                </span>
+                <span className="text-xs font-bold font-[Outfit] text-[var(--text-primary)]">
+                  {currentUser.breakfastCredits || 0}
+                </span>
+              </div>
+
+              {/* Dinner Pill */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+                <span className="text-[10px]" title="Dinner">
+                  Dinner:
+                </span>
+                <span className="text-xs font-bold font-[Outfit] text-[var(--text-primary)]">
+                  {currentUser.dinnerCredits || 0}
+                </span>
+              </div>
             </div>
           )}
 
+          {/* User Switcher */}
           <select
             value={currentUser?.id || ""}
             onChange={(e) => switchUser(e.target.value)}
             disabled={loading}
-            className="text-sm !rounded-xl !px-3 !py-1.5 !bg-[var(--bg-surface)] !border-[var(--border)] cursor-pointer min-w-[140px]"
+            className="text-sm !rounded-xl !px-3 !py-1.5 !bg-[var(--bg-surface)] !border-[var(--border)] cursor-pointer min-w-[140px] focus:ring-2 focus:ring-[var(--accent)]/20 outline-none"
           >
             {!currentUser && <option value="">Select user</option>}
             {allUsers.map((u) => (

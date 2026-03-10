@@ -22,7 +22,6 @@ export async function POST(
 
       if (!swap) throw new Error("Swap not found");
 
-      // Validating stages for confirmation
       const validStages = [
         "ACCEPTED",
         "CONFIRMED_BY_GIVER",
@@ -32,8 +31,6 @@ export async function POST(
         throw new Error("Swap must be accepted before confirming");
       }
 
-      // Logic: Giver is the one losing credits
-      // If OFFER: Owner (counterparty) is giver. If REQUEST: Proposer is giver.
       const isGiver =
         (swap.listing.type === "OFFER" && swap.counterpartyId === user.id) ||
         (swap.listing.type === "REQUEST" && swap.proposerId === user.id);
@@ -54,7 +51,6 @@ export async function POST(
         updateData.receiverConfirmed = true;
       }
 
-      // Check if this confirmation completes the swap
       const willBeBothConfirmed =
         (isGiver && swap.receiverConfirmed) ||
         (isReceiver && swap.giverConfirmed);
@@ -71,27 +67,40 @@ export async function POST(
         });
 
         if (!giver || !receiver) throw new Error("Users not found");
-        if (giver.trackedCredits < swap.amount)
-          throw new Error("Insufficient credits in Giver account");
 
-        // Atomic Credit Swap
+        // DYNAMIC FIELD SELECTION
+        const creditField =
+          swap.listing.creditType === "BREAKFAST"
+            ? "breakfastCredits"
+            : "dinnerCredits";
+
+        if (giver[creditField] < swap.amount)
+          throw new Error(
+            `Insufficient ${swap.listing.creditType.toLowerCase()} credits`,
+          );
+
+        if (receiver[creditField] + swap.amount > MAX_CREDITS)
+          throw new Error(
+            `Receiver would exceed max ${swap.listing.creditType.toLowerCase()} credits`,
+          );
+
+        // Atomic Credit Swap using dynamic keys
         await tx.user.update({
           where: { id: giverId },
-          data: { trackedCredits: { decrement: swap.amount } },
+          data: { [creditField]: { decrement: swap.amount } },
         });
         await tx.user.update({
           where: { id: receiverId },
-          data: { trackedCredits: { increment: swap.amount } },
+          data: { [creditField]: { increment: swap.amount } },
         });
 
         updateData.status = "COMPLETED";
 
-        // System message for the log
         await tx.swapMessage.create({
           data: {
             swapId: id,
-            userId: user.id, // Or a system user ID if you have one
-            message: `Swap completed! ${swap.amount} credits transferred successfully.`,
+            userId: user.id,
+            message: `Swap completed! ${swap.amount} ${swap.listing.creditType.toLowerCase()} credits transferred successfully.`,
           },
         });
       } else {

@@ -7,7 +7,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-
   const user = await getCurrentUser();
 
   const listing = await db.listing.findUnique({
@@ -19,14 +18,14 @@ export async function GET(
           name: true,
           nusId: true,
           contactHandle: true,
-          trackedCredits: true,
+          // Explicitly selecting both credit fields
+          breakfastCredits: true,
+          dinnerCredits: true,
         },
       },
       swaps: {
         where: user
-          ? {
-              OR: [{ proposerId: user.id }, { counterpartyId: user.id }],
-            }
+          ? { OR: [{ proposerId: user.id }, { counterpartyId: user.id }] }
           : undefined,
         select: {
           id: true,

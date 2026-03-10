@@ -5,7 +5,6 @@ import { ListingData, SwapData, SwapStatus } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/providers/AuthProvider";
 
-// Define exactly what the card expects, including the nested names from our API update
 interface ListingCardProps {
   listing: ListingData & {
     swaps?: (SwapData & {
@@ -53,7 +52,6 @@ export function ListingCard({ listing, index }: ListingCardProps) {
     mySwap && !["COMPLETED", "CANCELLED"].includes(mySwap.status);
   const isProposer = !isMine && !!mySwap;
 
-  // Identity logic
   let displayName = "";
   let showAvatar = false;
   if (mySwap) {
@@ -69,7 +67,6 @@ export function ListingCard({ listing, index }: ListingCardProps) {
     showAvatar = true;
   }
 
-  // Action logic
   let hasActionItem = false;
   if (mySwap && currentUser && isActiveSwap) {
     const isGiver =
@@ -103,30 +100,30 @@ export function ListingCard({ listing, index }: ListingCardProps) {
       href={href}
       className={`glass-card p-4 flex flex-col group relative overflow-hidden transition-all duration-300 hover:border-[var(--accent)]/50 animate-fade-in-up stagger-${Math.min(index + 1, 8)} ${isMine ? "border-l-4 border-l-[var(--accent)]" : ""} ${hasActionItem ? "ring-1 ring-[var(--accent)]/40" : ""}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex gap-1.5">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex gap-1.5 flex-wrap">
           <Badge color={isOffer ? "green" : "blue"}>
             {isOffer ? "OFFERING" : "REQUESTING"}
           </Badge>
           {isMine && <Badge color="accent">OWNER</Badge>}
-          {isProposer && <Badge color="purple">PROPOSED</Badge>}
+          {/* Removed the PROPOSED badge from here */}
         </div>
       </div>
 
       <div className="mb-2">
-        <div className="flex items-baseline gap-1">
+        <div className="flex items-baseline gap-1.5">
           <span
             className={`text-3xl font-black font-[Outfit] tracking-tight ${isOffer ? "text-[var(--offer-green)]" : "text-[var(--request-blue)]"}`}
           >
             {l.amount}
           </span>
-          <span className="text-[var(--text-muted)] text-[10px] font-bold uppercase tracking-tighter">
-            credits
+          <span className="text-[var(--text-primary)] text-[11px] font-bold uppercase tracking-tight">
+            {l.creditType.toLowerCase()} {l.amount === 1 ? "credit" : "credits"}
           </span>
         </div>
       </div>
 
-      <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-snug">
+      <p className="text-xs text-[var(--text-secondary)] mb-4 line-clamp-2 leading-snug min-h-[2.5rem]">
         {l.notes || (
           <span className="italic opacity-40">No notes provided</span>
         )}

@@ -25,7 +25,9 @@ export function SwapActions({ swap, onRefresh }: Props) {
     (swap.listing.type === "OFFER" && isCounterparty) ||
     (swap.listing.type === "REQUEST" && isProposer);
 
-  const alreadyConfirmed = isGiver ? swap.giverConfirmed : swap.receiverConfirmed;
+  const alreadyConfirmed = isGiver
+    ? swap.giverConfirmed
+    : swap.receiverConfirmed;
 
   const action = async (url: string) => {
     setLoading(true);
@@ -43,36 +45,53 @@ export function SwapActions({ swap, onRefresh }: Props) {
   return (
     <div className="space-y-4">
       {error && (
-        <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">{error}</p>
+        <p className="text-sm text-[var(--danger)] p-2 rounded-lg bg-[var(--danger)]/10">
+          {error}
+        </p>
       )}
 
       <div className="p-4 rounded-xl bg-[var(--bg-base)] border border-[var(--border-subtle)] space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-[var(--text-muted)]">Amount</span>
-          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">{swap.amount} credits</span>
+          {/* ADDED: Meal type alongside credits */}
+          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">
+            {swap.amount} {swap.listing.creditType.toLowerCase()}{" "}
+            {swap.amount === 1 ? "credit" : "credits"}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-[var(--text-muted)]">Your role</span>
-          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">{isGiver ? "Giver" : "Receiver"}</span>
+          <span className="font-semibold font-[Outfit] text-[var(--text-primary)]">
+            {isGiver ? "Giver" : "Receiver"}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-[var(--text-muted)]">Proposer</span>
-          <span className="text-[var(--text-secondary)]">{swap.proposer.name}</span>
+          <span className="text-[var(--text-secondary)]">
+            {swap.proposer.name}
+          </span>
         </div>
         <div className="flex justify-between">
           <span className="text-[var(--text-muted)]">Counterparty</span>
-          <span className="text-[var(--text-secondary)]">{swap.counterparty.name}</span>
+          <span className="text-[var(--text-secondary)]">
+            {swap.counterparty.name}
+          </span>
         </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         {swap.status === "PROPOSED" && isCounterparty && (
-          <Button onClick={() => action(`/api/swaps/${swap.id}/accept`)} disabled={loading}>
+          <Button
+            onClick={() => action(`/api/swaps/${swap.id}/accept`)}
+            disabled={loading}
+          >
             Accept Swap
           </Button>
         )}
 
-        {(swap.status === "ACCEPTED" || swap.status === "CONFIRMED_BY_GIVER" || swap.status === "CONFIRMED_BY_RECEIVER") &&
+        {(swap.status === "ACCEPTED" ||
+          swap.status === "CONFIRMED_BY_GIVER" ||
+          swap.status === "CONFIRMED_BY_RECEIVER") &&
           !alreadyConfirmed && (
             <Button
               variant="success"

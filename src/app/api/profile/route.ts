@@ -28,15 +28,12 @@ export async function PATCH(req: NextRequest) {
         OR: [{ proposerId: user.id }, { counterpartyId: user.id }],
         status: { notIn: ["COMPLETED", "CANCELLED"] },
       },
-      include: { listing: true }, // Need the listing data to clone it
+      include: { listing: true },
     });
 
     if (activeSwaps.length > 0 && !confirmReset) {
       return NextResponse.json(
-        {
-          error: "ACTIVE_SWAPS_FOUND",
-          count: activeSwaps.length,
-        },
+        { error: "ACTIVE_SWAPS_FOUND", count: activeSwaps.length },
         { status: 409 },
       );
     }
@@ -44,24 +41,21 @@ export async function PATCH(req: NextRequest) {
     return await db.$transaction(async (tx) => {
       if (confirmReset && activeSwaps.length > 0) {
         for (const swap of activeSwaps) {
-          // 1. Cancel the current swap
           await tx.swap.update({
             where: { id: swap.id },
             data: { status: "CANCELLED" },
           });
 
-          // 2. Mark the OLD listing as CANCELLED so it doesn't show up anymore
           await tx.listing.update({
             where: { id: swap.listingId },
             data: { status: "CANCELLED" },
           });
 
-          // 3. CLONE the listing to create a fresh one
-          // This ensures no "Swap Stage" or "Cancelled" history is attached
           await tx.listing.create({
             data: {
               userId: swap.listing.userId,
               type: swap.listing.type,
+              creditType: swap.listing.creditType,
               amount: swap.listing.amount,
               notes: swap.listing.notes,
               status: "ACTIVE",

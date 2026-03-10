@@ -12,7 +12,8 @@ export interface UserData {
   id: string;
   name: string;
   diningHall: string;
-  trackedCredits: number;
+  breakfastCredits: number;
+  dinnerCredits: number;
   contactHandle: string;
 }
 
@@ -20,12 +21,18 @@ export interface ListingData {
   id: string;
   userId: string;
   type: ListingType;
+  creditType: "BREAKFAST" | "DINNER";
   amount: number;
   notes: string;
   status: ListingStatus;
   expiresAt: string;
   createdAt: string;
-  user: { id: string; name: string };
+  user: {
+    id: string;
+    name: string;
+    breakfastCredits: number;
+    dinnerCredits: number;
+  };
 }
 
 export interface SwapData {
@@ -38,7 +45,13 @@ export interface SwapData {
   giverConfirmed: boolean;
   receiverConfirmed: boolean;
   createdAt: string;
-  listing: { id: string; type: ListingType; amount: number; notes: string };
+  listing: {
+    id: string;
+    type: ListingType;
+    creditType: "BREAKFAST" | "DINNER";
+    amount: number;
+    notes: string;
+  };
   proposer: {
     id: string;
     name: string;

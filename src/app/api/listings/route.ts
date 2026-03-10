@@ -8,30 +8,22 @@ import { z } from "zod";
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
-  if (!user) {
+  if (!user)
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
   const { searchParams } = new URL(req.url);
 
-  const typeResult = z
-    .enum(["OFFER", "REQUEST"])
-    .nullable()
-    .safeParse(searchParams.get("type"));
-
-  if (!typeResult.success) {
-    return NextResponse.json(
-      { error: "Invalid type parameter" },
-      { status: 400 },
-    );
-  }
-
-  const type = typeResult.data;
+  // 1. Validation for query params
+  const type = searchParams.get("type") as "OFFER" | "REQUEST" | null;
+  const creditType = searchParams.get("creditType") as
+    | "BREAKFAST"
+    | "DINNER"
+    | null;
   const userIdParam = searchParams.get("userId");
 
   const now = new Date();
 
-  // Lazy-expire: update expired listings
+  // 2. Lazy-expire listings
   await db.listing.updateMany({
     where: { status: "ACTIVE", expiresAt: { lt: now } },
     data: { status: "EXPIRED" },
@@ -58,14 +50,10 @@ export async function GET(req: NextRequest) {
   } else {
     where = {
       status: "ACTIVE",
-      user: {
-        diningHall: user.diningHall,
-      },
+      user: { diningHall: user.diningHall },
     };
-
-    if (type) {
-      where.type = type;
-    }
+    if (type) where.type = type;
+    if (creditType) where.creditType = creditType; // Filter by meal type
   }
 
   const listings = await db.listing.findMany({
@@ -76,20 +64,17 @@ export async function GET(req: NextRequest) {
           id: true,
           name: true,
           diningHall: true,
+          breakfastCredits: true,
+          dinnerCredits: true,
         },
       },
       swaps: {
-        where: {
-          OR: [{ proposerId: user.id }, { counterpartyId: user.id }],
-        },
+        where: { OR: [{ proposerId: user.id }, { counterpartyId: user.id }] },
         select: {
           id: true,
           status: true,
-          giverConfirmed: true,
-          receiverConfirmed: true,
           proposerId: true,
           counterpartyId: true,
-          // --- ADDED: Fetch names for both sides ---
           proposer: { select: { name: true } },
           counterparty: { select: { name: true } },
         },
@@ -103,12 +88,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
-  if (!user) {
+  if (!user)
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
 
   const body = await req.json();
   const parsed = createListingSchema.safeParse(body);
+
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten() },
@@ -121,6 +106,7 @@ export async function POST(req: NextRequest) {
   const todayCount = await db.listing.count({
     where: { userId: user.id, createdAt: { gte: startOfDay } },
   });
+
   if (todayCount >= MAX_DAILY_LISTINGS) {
     return NextResponse.json(
       { error: `Max ${MAX_DAILY_LISTINGS} listings per day` },
@@ -134,6 +120,7 @@ export async function POST(req: NextRequest) {
     data: {
       userId: user.id,
       type: parsed.data.type,
+      creditType: parsed.data.creditType,
       amount: parsed.data.amount,
       notes: parsed.data.notes || "",
       expiresAt,

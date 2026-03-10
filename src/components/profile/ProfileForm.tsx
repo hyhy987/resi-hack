@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
-import { DINING_HALLS } from "@/lib/constants";
+import { DINING_HALLS, MAX_CREDITS } from "@/lib/constants";
 
 export function ProfileForm() {
   const { currentUser, refreshUser } = useAuth();
@@ -12,13 +12,13 @@ export function ProfileForm() {
   const [nusId, setNusId] = useState("");
   const [diningHall, setDiningHall] = useState("RVRC");
   const [contactHandle, setContactHandle] = useState("");
-  const [trackedCredits, setTrackedCredits] = useState("0");
+  const [breakfastCredits, setBreakfastCredits] = useState("0");
+  const [dinnerCredits, setDinnerCredits] = useState("0");
 
   const [saving, setSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  // NEW: State for Custom Modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingSwapCount, setPendingSwapCount] = useState(0);
 
@@ -28,7 +28,8 @@ export function ProfileForm() {
       setNusId((currentUser as any).nusId || "");
       setDiningHall(currentUser.diningHall || "RVRC");
       setContactHandle(currentUser.contactHandle || "");
-      setTrackedCredits(String(currentUser.trackedCredits || 0));
+      setBreakfastCredits(String(currentUser.breakfastCredits || 0));
+      setDinnerCredits(String(currentUser.dinnerCredits || 0));
     }
   }, [currentUser]);
 
@@ -44,7 +45,7 @@ export function ProfileForm() {
     setSaving(true);
     setError("");
     setShowSuccess(false);
-    setShowConfirmModal(false); // Close modal if it was open
+    setShowConfirmModal(false);
 
     try {
       const res = await fetch("/api/profile", {
@@ -55,7 +56,8 @@ export function ProfileForm() {
           nusId: nusId.toUpperCase(),
           diningHall,
           contactHandle,
-          trackedCredits: Number(trackedCredits),
+          breakfastCredits: Number(breakfastCredits),
+          dinnerCredits: Number(dinnerCredits),
           confirmReset,
         }),
       });
@@ -110,51 +112,66 @@ export function ProfileForm() {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+            Dining Hall
+          </label>
+          <div className="relative group">
+            <select
+              value={diningHall}
+              onChange={(e) => setDiningHall(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
+            >
+              {DINING_HALLS.map((hall) => (
+                <option key={hall} value={hall}>
+                  {hall}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* --- DUAL CREDIT INPUTS --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              Dining Hall
-            </label>
-            <div className="relative group">
-              <select
-                value={diningHall}
-                onChange={(e) => setDiningHall(e.target.value)}
-                className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
-              >
-                {DINING_HALLS.map((hall) => (
-                  <option key={hall} value={hall}>
-                    {hall}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              Tracked Credits (0-200)
+              Breakfast Credits (0-{MAX_CREDITS})
             </label>
             <input
               type="number"
               min="0"
-              max="200"
-              value={trackedCredits}
-              onChange={(e) => setTrackedCredits(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+              max={MAX_CREDITS}
+              value={breakfastCredits}
+              onChange={(e) => setBreakfastCredits(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+              Dinner Credits (0-{MAX_CREDITS})
+            </label>
+            <input
+              type="number"
+              min="0"
+              max={MAX_CREDITS}
+              value={dinnerCredits}
+              onChange={(e) => setDinnerCredits(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
             />
           </div>
         </div>
@@ -191,16 +208,13 @@ export function ProfileForm() {
         </Button>
       </form>
 
-      {/* --- CUSTOM CONFIRMATION MODAL --- */}
+      {/* --- CONFIRMATION MODAL --- */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowConfirmModal(false)}
           />
-
-          {/* Modal Card */}
           <div className="relative glass-card-static w-full max-w-md p-8 animate-zoom-in">
             <div className="mb-6 text-center">
               <div className="w-16 h-16 bg-[var(--danger)]/10 text-[var(--danger)] rounded-full flex items-center justify-center mx-auto mb-4">
@@ -232,7 +246,6 @@ export function ProfileForm() {
                 will revert these swaps and notify counterparties.
               </p>
             </div>
-
             <div className="flex flex-col gap-3">
               <Button
                 variant="danger"

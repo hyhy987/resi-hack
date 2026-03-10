@@ -56,11 +56,21 @@ export async function POST(req: NextRequest) {
 
       if (!giver || !receiver) throw new Error("User not found");
 
-      if (giver.trackedCredits < parsed.data.amount) {
-        throw new Error("Giver doesn't have enough credits");
+      // DYNAMIC FIELD SELECTION
+      const creditField =
+        listing.creditType === "BREAKFAST"
+          ? "breakfastCredits"
+          : "dinnerCredits";
+
+      if (giver[creditField] < parsed.data.amount) {
+        throw new Error(
+          `Giver doesn't have enough ${listing.creditType.toLowerCase()} credits`,
+        );
       }
-      if (receiver.trackedCredits + parsed.data.amount > MAX_CREDITS) {
-        throw new Error("Receiver would exceed max credits");
+      if (receiver[creditField] + parsed.data.amount > MAX_CREDITS) {
+        throw new Error(
+          `Receiver would exceed max ${listing.creditType.toLowerCase()} credits`,
+        );
       }
 
       await tx.listing.update({

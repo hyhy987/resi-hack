@@ -16,7 +16,8 @@ export async function getCurrentUser() {
       name: true,
       nusId: true,
       diningHall: true,
-      trackedCredits: true,
+      breakfastCredits: true,
+      dinnerCredits: true,
       contactHandle: true,
     },
   });

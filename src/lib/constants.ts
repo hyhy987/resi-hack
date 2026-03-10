@@ -1,4 +1,8 @@
-export const MAX_CREDITS = 200;
+export const MAX_SWAP_AMOUNT = 3;
+export const MAX_CREDITS = 150;
+export const CREDIT_TYPES = ["BREAKFAST", "DINNER"] as const;
+export type CreditType = (typeof CREDIT_TYPES)[number];
+
 export const MAX_DAILY_LISTINGS = 3;
 export const EXPIRY_HOURS = 48;
 
