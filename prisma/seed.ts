@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { DiningHall } from "@/lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -12,8 +13,10 @@ async function main() {
     data: {
       id: "alice",
       name: "Alice",
-      email: "alice@nus.edu.sg",
-      trackedCredits: 45,
+      diningHall: "RVRC" as DiningHall,
+      nusId: "E1430273",
+      breakfastCredits: 45,
+      dinnerCredits: 45,
       contactHandle: "@alice_tele",
     },
   });
@@ -22,8 +25,10 @@ async function main() {
     data: {
       id: "bob",
       name: "Bob",
-      email: "bob@nus.edu.sg",
-      trackedCredits: 20,
+      diningHall: "RVRC" as DiningHall,
+      nusId: "E1837291",
+      breakfastCredits: 20,
+      dinnerCredits: 20,
       contactHandle: "@bob_tele",
     },
   });
@@ -32,13 +37,27 @@ async function main() {
     data: {
       id: "charlie",
       name: "Charlie",
-      email: "charlie@nus.edu.sg",
-      trackedCredits: 72,
+      diningHall: "RVRC" as DiningHall,
+      nusId: "E1038391",
+      breakfastCredits: 72,
+      dinnerCredits: 72,
       contactHandle: "@charlie_tele",
     },
   });
 
-  console.log("Seeded 3 users: Alice (45), Bob (20), Charlie (72)");
+  await prisma.user.create({
+    data: {
+      id: "david",
+      name: "David",
+      diningHall: "Cendana" as DiningHall,
+      nusId: "E1182743",
+      breakfastCredits: 50,
+      dinnerCredits: 50,
+      contactHandle: "@david_tele",
+    },
+  });
+
+  console.log("Seeded 4 users: Alice (45), Bob (20), Charlie (72), David (50)");
 }
 
 main()

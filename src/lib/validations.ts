@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { MAX_CREDITS } from "./constants";
+import { MAX_CREDITS, DINING_HALLS } from "./constants";
 
 export const createListingSchema = z.object({
   type: z.enum(["OFFER", "REQUEST"]),
+  creditType: z.enum(["BREAKFAST", "DINNER"]),
   amount: z.number().int().min(1).max(MAX_CREDITS),
   notes: z.string().max(500).optional().default(""),
 });
@@ -19,5 +20,13 @@ export const sendMessageSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   contactHandle: z.string().max(100).optional(),
-  trackedCredits: z.number().int().min(0).max(MAX_CREDITS).optional(),
+  diningHall: z.enum(DINING_HALLS),
+  nusId: z
+    .string()
+    .regex(
+      /^E\d{7}$/,
+      "Invalid format. Use E followed by 7 digits (e.g. E1234567)",
+    ),
+  breakfastCredits: z.number().int().min(0).max(MAX_CREDITS).optional(),
+  dinnerCredits: z.number().int().min(0).max(MAX_CREDITS).optional(),
 });

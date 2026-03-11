@@ -8,29 +8,32 @@ datasource db {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  name           String
-  email          String?
-  trackedCredits Int          @default(0)
-  contactHandle  String       @default("")
-  createdAt      DateTime     @default(now())
-  listings       Listing[]
-  proposedSwaps  Swap[]       @relation("proposer")
-  receivedSwaps  Swap[]       @relation("counterparty")
-  messages       SwapMessage[]
+  id               String       @id @default(cuid())
+  name             String
+  nusId            String       
+  diningHall       String       
+  breakfastCredits Int          @default(0)
+  dinnerCredits    Int          @default(0)
+  contactHandle    String       @default("")
+  createdAt        DateTime     @default(now())
+  listings         Listing[]
+  proposedSwaps    Swap[]       @relation("proposer")
+  receivedSwaps    Swap[]       @relation("counterparty")
+  messages         SwapMessage[]
 }
 
 model Listing {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String   // OFFER or REQUEST
-  amount    Int
-  notes     String   @default("")
-  status    String   @default("ACTIVE") // ACTIVE, MATCHED, EXPIRED, CANCELLED
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
-  swaps     Swap[]
+  id         String   @id @default(cuid())
+  userId     String
+  type       String   // OFFER or REQUEST
+  creditType String
+  amount     Int
+  notes      String   @default("")
+  status     String   @default("ACTIVE") // ACTIVE, MATCHED, EXPIRED, CANCELLED
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  swaps      Swap[]
 }
 
 model Swap {

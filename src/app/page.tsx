@@ -47,8 +47,9 @@ export default function ListingsPage() {
         <h1 className="text-4xl font-extrabold font-[Outfit] text-[var(--text-primary)] tracking-tight mb-2">
           Marketplace
         </h1>
-        <p className="text-[var(--text-secondary)] max-w-lg">
-          Browse credit offers and requests from fellow NUS residents. Click any listing to see details and make an offer.
+        <p className="text-[var(--text-secondary)]">
+          Browse credit offers and requests from fellow NUS residents. Click any
+          listing to see details and make an offer.
         </p>
       </div>
 

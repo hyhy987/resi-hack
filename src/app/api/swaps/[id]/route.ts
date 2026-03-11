@@ -1,19 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const swap = await db.swap.findUnique({
     where: { id },
     include: {
       listing: {
-        select: { id: true, type: true, amount: true, notes: true },
+        select: { id: true, type: true, creditType: true, amount: true, notes: true },
       },
-      proposer: { select: { id: true, name: true } },
-      counterparty: { select: { id: true, name: true } },
+      proposer: {
+        select: { id: true, name: true, nusId: true, contactHandle: true },
+      },
+      counterparty: {
+        select: { id: true, name: true, nusId: true, contactHandle: true },
+      },
       messages: {
         include: { user: { select: { id: true, name: true } } },
         orderBy: { createdAt: "asc" },

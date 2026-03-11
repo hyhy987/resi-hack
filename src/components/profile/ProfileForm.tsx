@@ -1,109 +1,270 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
+import { DINING_HALLS, MAX_CREDITS } from "@/lib/constants";
 
 export function ProfileForm() {
   const { currentUser, refreshUser } = useAuth();
-  const [name, setName] = useState(currentUser?.name || "");
-  const [contactHandle, setContactHandle] = useState(
-    currentUser?.contactHandle || ""
-  );
-  const [trackedCredits, setTrackedCredits] = useState(
-    String(currentUser?.trackedCredits || 0)
-  );
+
+  const [name, setName] = useState("");
+  const [nusId, setNusId] = useState("");
+  const [diningHall, setDiningHall] = useState("RVRC");
+  const [contactHandle, setContactHandle] = useState("");
+  const [breakfastCredits, setBreakfastCredits] = useState("0");
+  const [dinnerCredits, setDinnerCredits] = useState("0");
+
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  if (!currentUser) {
-    return <p className="text-[var(--text-muted)]">Please select a user first.</p>;
-  }
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingSwapCount, setPendingSwapCount] = useState(0);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setMessage("");
-
-    const res = await fetch("/api/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        contactHandle,
-        trackedCredits: Number(trackedCredits),
-      }),
-    });
-
-    if (res.ok) {
-      setMessage("Profile updated!");
-      await refreshUser();
-    } else {
-      setMessage("Failed to update profile.");
+  useEffect(() => {
+    if (currentUser) {
+      setName(currentUser.name || "");
+      setNusId((currentUser as any).nusId || "");
+      setDiningHall(currentUser.diningHall || "RVRC");
+      setContactHandle(currentUser.contactHandle || "");
+      setBreakfastCredits(String(currentUser.breakfastCredits || 0));
+      setDinnerCredits(String(currentUser.dinnerCredits || 0));
     }
-    setSaving(false);
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (showSuccess) {
+      const timer = setTimeout(() => setShowSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccess]);
+
+  const handleSubmit = async (e?: React.FormEvent, confirmReset = false) => {
+    if (e) e.preventDefault();
+    setSaving(true);
+    setError("");
+    setShowSuccess(false);
+    setShowConfirmModal(false);
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          nusId: nusId.toUpperCase(),
+          diningHall,
+          contactHandle,
+          breakfastCredits: Number(breakfastCredits),
+          dinnerCredits: Number(dinnerCredits),
+          confirmReset,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowSuccess(true);
+        await refreshUser();
+      } else if (res.status === 409 && data.error === "ACTIVE_SWAPS_FOUND") {
+        setPendingSwapCount(data.count);
+        setShowConfirmModal(true);
+      } else {
+        setError(data.error || "Failed to update profile.");
+      }
+    } catch (err) {
+      setError("A network error occurred.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
-          Name
-        </label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 text-sm"
-          required
-        />
-      </div>
+    <>
+      <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+              NUS ID (E-number)
+            </label>
+            <input
+              type="text"
+              placeholder="E1234567"
+              value={nusId}
+              onChange={(e) => setNusId(e.target.value.toUpperCase())}
+              maxLength={8}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all font-mono text-sm"
+              required
+            />
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
-          Telegram Handle
-        </label>
-        <input
-          type="text"
-          value={contactHandle}
-          onChange={(e) => setContactHandle(e.target.value)}
-          className="w-full px-3 py-2 text-sm"
-          placeholder="@your_handle"
-        />
-        <p className="text-xs text-[var(--text-muted)] mt-1.5">
-          Visible to others on your listings so they can contact you.
-        </p>
-      </div>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+            Dining Hall
+          </label>
+          <div className="relative group">
+            <select
+              value={diningHall}
+              onChange={(e) => setDiningHall(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
+            >
+              {DINING_HALLS.map((hall) => (
+                <option key={hall} value={hall}>
+                  {hall}
+                </option>
+              ))}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
+          </div>
+        </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-2 font-[Outfit]">
-          Tracked Credits <span className="normal-case font-normal">(0-99)</span>
-        </label>
-        <input
-          type="number"
-          min="0"
-          max="99"
-          value={trackedCredits}
-          onChange={(e) => setTrackedCredits(e.target.value)}
-          className="w-full px-3 py-2 text-sm"
-        />
-      </div>
+        {/* --- DUAL CREDIT INPUTS --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+              Breakfast Credits (0-{MAX_CREDITS})
+            </label>
+            <input
+              type="number"
+              min="0"
+              max={MAX_CREDITS}
+              value={breakfastCredits}
+              onChange={(e) => setBreakfastCredits(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+              Dinner Credits (0-{MAX_CREDITS})
+            </label>
+            <input
+              type="number"
+              min="0"
+              max={MAX_CREDITS}
+              value={dinnerCredits}
+              onChange={(e) => setDinnerCredits(e.target.value)}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
+            />
+          </div>
+        </div>
 
-      {message && (
-        <p
-          className={`text-sm p-2 rounded-lg ${
-            message.includes("updated")
-              ? "text-[var(--success)] bg-[var(--success)]/10"
-              : "text-[var(--danger)] bg-[var(--danger)]/10"
-          }`}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
+            Telegram Handle
+          </label>
+          <input
+            type="text"
+            value={contactHandle}
+            onChange={(e) => setContactHandle(e.target.value)}
+            className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+            placeholder="@your_handle"
+          />
+        </div>
+
+        {error && (
+          <div className="text-xs p-3 rounded-xl border animate-fade-in text-[var(--danger)] bg-[var(--danger)]/10 border-[var(--danger)]/20">
+            {error}
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          className={`w-full py-6 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${showSuccess ? "bg-[var(--offer-green)] hover:bg-[var(--offer-green)] border-[var(--offer-green)]" : ""}`}
+          disabled={saving}
         >
-          {message}
-        </p>
-      )}
+          {saving
+            ? "Processing..."
+            : showSuccess
+              ? "Updated!"
+              : "Update Profile"}
+        </Button>
+      </form>
 
-      <Button type="submit" disabled={saving}>
-        {saving ? "Saving..." : "Save Profile"}
-      </Button>
-    </form>
+      {/* --- CONFIRMATION MODAL --- */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowConfirmModal(false)}
+          />
+          <div className="relative glass-card-static w-full max-w-md p-8 animate-zoom-in">
+            <div className="mb-6 text-center">
+              <div className="w-16 h-16 bg-[var(--danger)]/10 text-[var(--danger)] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m10.27 2.18-8 14c-.3.52-.3 1.15 0 1.66.3.52.88.84 1.5.84h16.44c.62 0 1.2-.32 1.5-.84.3-.51.3-1.14 0-1.66l-8-14c-.3-.52-.88-.84-1.5-.84s-1.2.32-1.5.84Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold font-[Outfit] text-[var(--text-primary)] mb-2">
+                Active Swaps Found
+              </h3>
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                You have{" "}
+                <span className="text-[var(--text-primary)] font-bold">
+                  {pendingSwapCount}
+                </span>{" "}
+                incomplete transaction(s). Changing your Residential College
+                will revert these swaps and notify counterparties.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="danger"
+                className="w-full py-4 text-xs font-bold uppercase tracking-widest bg-[var(--danger)] hover:bg-[var(--danger)]/80"
+                onClick={() => handleSubmit(undefined, true)}
+              >
+                Confirm & Revert Swaps
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full py-4 text-xs font-bold uppercase tracking-widest border border-[var(--border-subtle)]"
+                onClick={() => setShowConfirmModal(false)}
+              >
+                Go Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
