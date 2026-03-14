@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAX_CREDITS, DINING_HALLS } from "./constants";
+import { MAX_CREDITS, MAX_SWAP_AMOUNT, DINING_HALLS } from "./constants";
 
 const nusIdSchema = z
   .string()
@@ -21,7 +21,7 @@ export const signupSchema = z.object({
 export const createListingSchema = z.object({
   type: z.enum(["OFFER", "REQUEST"]),
   creditType: z.enum(["BREAKFAST", "DINNER"]),
-  amount: z.number().int().min(1).max(MAX_CREDITS),
+  amount: z.number().int().min(1).max(MAX_SWAP_AMOUNT),
   notes: z.string().max(500).optional().default(""),
 });
 

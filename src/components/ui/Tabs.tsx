@@ -1,14 +1,14 @@
 "use client";
 
 interface TabsProps {
-  tabs: { key: string; label: string }[];
+  tabs: { key: string; label: string; count?: number }[];
   active: string;
   onChange: (key: string) => void;
 }
 
 export function Tabs({ tabs, active, onChange }: TabsProps) {
   return (
-    <div className="flex gap-1 p-1 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] mb-6 w-fit">
+    <div className="flex gap-1 p-1 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] w-fit">
       {tabs.map((tab) => (
         <button
           key={tab.key}
@@ -20,6 +20,9 @@ export function Tabs({ tabs, active, onChange }: TabsProps) {
           }`}
         >
           {tab.label}
+          {tab.count !== undefined && active === tab.key && (
+            <span className="ml-1.5 opacity-90">({tab.count})</span>
+          )}
         </button>
       ))}
     </div>

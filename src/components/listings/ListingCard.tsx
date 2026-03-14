@@ -4,6 +4,10 @@ import Link from "next/link";
 import { ListingData, SwapData, SwapStatus } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { useAuth } from "@/providers/AuthProvider";
+import {
+  formatExpiry,
+  hoursUntilExpiry,
+} from "@/lib/format";
 
 interface ListingCardProps {
   listing: ListingData & {
@@ -13,19 +17,21 @@ interface ListingCardProps {
     })[];
   };
   index: number;
+  fromTab?: string;
 }
 
-export function ListingCard({ listing, index }: ListingCardProps) {
+const EXPIRY_URGENT_HOURS = 6;
+
+export function ListingCard({
+  listing,
+  index,
+  fromTab = "OFFER",
+}: ListingCardProps) {
   const { currentUser } = useAuth();
   const l = listing;
-
-  const formatExpiry = (expiresAt: string) => {
-    const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return "Expired";
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
+  const hoursLeft = hoursUntilExpiry(l.expiresAt);
+  const isExpiryUrgent =
+    l.status === "ACTIVE" && hoursLeft > 0 && hoursLeft < EXPIRY_URGENT_HOURS;
 
   const getSwapStatusLabel = (status: SwapStatus): string => {
     switch (status) {
@@ -93,7 +99,9 @@ export function ListingCard({ listing, index }: ListingCardProps) {
   }
 
   const statusLabel = mySwap ? getSwapStatusLabel(mySwap.status) : null;
-  const href = isActiveSwap ? `/swap/${mySwap.id}` : `/listing/${l.id}`;
+  const href = isActiveSwap
+    ? `/swap/${mySwap.id}`
+    : `/listing/${l.id}?fromTab=${encodeURIComponent(fromTab)}`;
 
   return (
     <Link
@@ -106,7 +114,12 @@ export function ListingCard({ listing, index }: ListingCardProps) {
             {isOffer ? "OFFERING" : "REQUESTING"}
           </Badge>
           {isMine && <Badge color="accent">OWNER</Badge>}
-          {/* Removed the PROPOSED badge from here */}
+          <span
+            className="text-[10px] font-bold uppercase tracking-tight text-[var(--text-muted)] px-2 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-subtle)]"
+            title={l.creditType}
+          >
+            {l.creditType === "BREAKFAST" ? "Breakfast" : "Dinner"}
+          </span>
         </div>
       </div>
 
@@ -159,7 +172,13 @@ export function ListingCard({ listing, index }: ListingCardProps) {
               </span>
             )}
             <span
-              className={`text-[11px] font-bold font-[Outfit] ${statusLabel ? "text-[var(--accent)]" : "text-[var(--text-primary)]"}`}
+              className={`text-[11px] font-bold font-[Outfit] ${
+                statusLabel
+                  ? "text-[var(--accent)]"
+                  : isExpiryUrgent
+                    ? "text-[var(--warning)]"
+                    : "text-[var(--text-primary)]"
+              }`}
             >
               {statusLabel ||
                 (l.status === "ACTIVE"
