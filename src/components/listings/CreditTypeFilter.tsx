@@ -1,6 +1,6 @@
 "use client";
 
-type CreditTypeFilterValue = "all" | "BREAKFAST" | "DINNER";
+export type CreditTypeFilterValue = "all" | "BREAKFAST" | "DINNER";
 
 interface CreditTypeFilterProps {
   value: CreditTypeFilterValue;

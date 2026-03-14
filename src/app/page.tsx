@@ -7,7 +7,10 @@ import { Tabs } from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/Button";
 import { ListingsGrid } from "@/components/listings/ListingsGrid";
 import { CreateListingModal } from "@/components/listings/CreateListingModal";
-import { CreditTypeFilter } from "@/components/listings/CreditTypeFilter";
+import {
+  CreditTypeFilter,
+  CreditTypeFilterValue,
+} from "@/components/listings/CreditTypeFilter";
 import { useAuth } from "@/providers/AuthProvider";
 import { ListingData } from "@/types";
 import { EXPIRY_HOURS } from "@/lib/constants";
@@ -18,7 +21,6 @@ const tabs = [
   { key: "mine", label: "My Listings" },
 ];
 
-type CreditTypeFilterValue = "all" | "BREAKFAST" | "DINNER";
 type SortValue = "newest" | "expiring";
 
 function ListingsPageContent() {
