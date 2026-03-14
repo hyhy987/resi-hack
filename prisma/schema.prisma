@@ -10,8 +10,9 @@ datasource db {
 model User {
   id               String       @id @default(cuid())
   name             String
-  nusId            String       
-  diningHall       String       
+  nusId            String       @unique
+  passwordHash     String
+  diningHall       String
   breakfastCredits Int          @default(0)
   dinnerCredits    Int          @default(0)
   contactHandle    String       @default("")

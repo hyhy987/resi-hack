@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
 import { DINING_HALLS, MAX_CREDITS } from "@/lib/constants";
 
-export function ProfileForm() {
+interface ProfileFormProps {
+  onSaved?: () => void;
+}
+
+export function ProfileForm({ onSaved }: ProfileFormProps) {
   const { currentUser, refreshUser } = useAuth();
 
   const [name, setName] = useState("");
@@ -25,7 +29,7 @@ export function ProfileForm() {
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || "");
-      setNusId((currentUser as any).nusId || "");
+      setNusId(currentUser.nusId || "");
       setDiningHall(currentUser.diningHall || "RVRC");
       setContactHandle(currentUser.contactHandle || "");
       setBreakfastCredits(String(currentUser.breakfastCredits || 0));
@@ -67,6 +71,7 @@ export function ProfileForm() {
       if (res.ok) {
         setShowSuccess(true);
         await refreshUser();
+        onSaved?.();
       } else if (res.status === 409 && data.error === "ACTIVE_SWAPS_FOUND") {
         setPendingSwapCount(data.count);
         setShowConfirmModal(true);
@@ -80,113 +85,129 @@ export function ProfileForm() {
     }
   };
 
+  const inputBase =
+    "w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 outline-none transition-all text-sm";
+
   return (
     <>
-      <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              Full Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              NUS ID (E-number)
-            </label>
-            <input
-              type="text"
-              placeholder="E1234567"
-              value={nusId}
-              onChange={(e) => setNusId(e.target.value.toUpperCase())}
-              maxLength={8}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all font-mono text-sm"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-            Dining Hall
-          </label>
-          <div className="relative group">
-            <select
-              value={diningHall}
-              onChange={(e) => setDiningHall(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
-            >
-              {DINING_HALLS.map((hall) => (
-                <option key={hall} value={hall}>
-                  {hall}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
+      <form onSubmit={(e) => handleSubmit(e)} className="space-y-8">
+        <div className="space-y-8">
+          {/* Personal info */}
+          <div>
+            <h3 className="text-xs font-bold uppercase text-[var(--text-muted)] tracking-widest mb-4">
+              Personal info
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputBase}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  NUSNET ID
+                </label>
+                <input
+                  type="text"
+                  placeholder="E1234567"
+                  value={nusId}
+                  onChange={(e) => setNusId(e.target.value.toUpperCase())}
+                  maxLength={8}
+                  className={`${inputBase} font-mono`}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  Dining Hall
+                </label>
+                <div className="relative group">
+                  <select
+                    value={diningHall}
+                    onChange={(e) => setDiningHall(e.target.value)}
+                    className={`${inputBase} pr-10 appearance-none cursor-pointer`}
+                  >
+                    {DINING_HALLS.map((hall) => (
+                      <option key={hall} value={hall}>
+                        {hall}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  Telegram handle
+                </label>
+                <input
+                  type="text"
+                  value={contactHandle}
+                  onChange={(e) => setContactHandle(e.target.value)}
+                  className={inputBase}
+                  placeholder="@username"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* --- DUAL CREDIT INPUTS --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              Breakfast Credits (0-{MAX_CREDITS})
-            </label>
-            <input
-              type="number"
-              min="0"
-              max={MAX_CREDITS}
-              value={breakfastCredits}
-              onChange={(e) => setBreakfastCredits(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
-            />
+          {/* Credits */}
+          <div>
+            <h3 className="text-xs font-bold uppercase text-[var(--text-muted)] tracking-widest mb-4">
+              Credit balance
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  Breakfast
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={MAX_CREDITS}
+                  value={breakfastCredits}
+                  onChange={(e) => setBreakfastCredits(e.target.value)}
+                  className={`${inputBase} font-medium`}
+                />
+                <p className="text-[10px] text-[var(--text-muted)]">0–{MAX_CREDITS}</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest">
+                  Dinner
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={MAX_CREDITS}
+                  value={dinnerCredits}
+                  onChange={(e) => setDinnerCredits(e.target.value)}
+                  className={`${inputBase} font-medium`}
+                />
+                <p className="text-[10px] text-[var(--text-muted)]">0–{MAX_CREDITS}</p>
+              </div>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-              Dinner Credits (0-{MAX_CREDITS})
-            </label>
-            <input
-              type="number"
-              min="0"
-              max={MAX_CREDITS}
-              value={dinnerCredits}
-              onChange={(e) => setDinnerCredits(e.target.value)}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm font-medium"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
-            Telegram Handle
-          </label>
-          <input
-            type="text"
-            value={contactHandle}
-            onChange={(e) => setContactHandle(e.target.value)}
-            className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
-            placeholder="@your_handle"
-          />
         </div>
 
         {error && (
@@ -195,17 +216,19 @@ export function ProfileForm() {
           </div>
         )}
 
-        <Button
-          type="submit"
-          className={`w-full py-6 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${showSuccess ? "bg-[var(--offer-green)] hover:bg-[var(--offer-green)] border-[var(--offer-green)]" : ""}`}
-          disabled={saving}
-        >
-          {saving
-            ? "Processing..."
-            : showSuccess
-              ? "Updated!"
-              : "Update Profile"}
-        </Button>
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            className={`py-3.5 px-8 text-sm font-bold uppercase tracking-widest transition-all duration-300 ${showSuccess ? "bg-[var(--offer-green)] hover:bg-[var(--offer-green)] border-[var(--offer-green)]" : ""}`}
+            disabled={saving}
+          >
+            {saving
+              ? "Saving..."
+              : showSuccess
+                ? "Saved!"
+                : "Save changes"}
+          </Button>
+        </div>
       </form>
 
       {/* --- CONFIRMATION MODAL --- */}
