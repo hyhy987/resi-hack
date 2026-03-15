@@ -7,10 +7,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { Button } from "@/components/ui/Button";
 import { DINING_HALLS } from "@/lib/constants";
 import { useAuth } from "@/providers/AuthProvider";
+import { useToast } from "@/components/ui/Toast";
 
 export default function SignupPage() {
   const router = useRouter();
   const { refreshUser } = useAuth();
+  const { toast } = useToast();
 
   const [nusId, setNusId] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +21,7 @@ export default function SignupPage() {
   const [diningHall, setDiningHall] = useState("RVRC");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +60,7 @@ export default function SignupPage() {
       }
 
       if (res.ok) {
+        toast("Account created! Welcome to CreditSwap.", "success");
         await refreshUser();
         router.push("/");
         router.refresh();
@@ -75,6 +79,16 @@ export default function SignupPage() {
     <PageContainer>
       <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center py-12">
         <div className="w-full max-w-md animate-fade-in-up">
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-8">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[#c76a52] flex items-center justify-center text-white font-bold text-base font-[Outfit] shadow-lg shadow-[var(--accent-glow)]">
+              CS
+            </div>
+            <span className="text-xl font-bold font-[Outfit] text-[var(--text-primary)] tracking-tight">
+              CreditSwap
+            </span>
+          </div>
+
           <div className="glass-card-static p-8">
             <h1 className="text-2xl font-bold font-[Outfit] text-[var(--text-primary)] tracking-tight mb-2">
               Create account
@@ -88,55 +102,97 @@ export default function SignupPage() {
                 <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
                   NUSNET ID
                 </label>
-                <input
-                  type="text"
-                  placeholder="E1234567"
-                  value={nusId}
-                  onChange={(e) => setNusId(e.target.value.toUpperCase())}
-                  maxLength={8}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all font-mono text-sm"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="E1234567"
+                    value={nusId}
+                    onChange={(e) => setNusId(e.target.value.toUpperCase())}
+                    maxLength={8}
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pl-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all font-mono text-sm"
+                    required
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
                   Password
                 </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
-                  placeholder="At least 6 characters"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pl-10 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+                    placeholder="At least 6 characters"
+                    required
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                        <line x1="1" y1="1" x2="23" y2="23" />
+                      </svg>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pl-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+                    required
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                </div>
               </div>
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold uppercase text-[var(--text-muted)] tracking-widest ml-1">
                   Full Name
                 </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pl-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm"
+                    required
+                  />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+                    <path d="m15 5 4 4" />
+                  </svg>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -147,7 +203,7 @@ export default function SignupPage() {
                   <select
                     value={diningHall}
                     onChange={(e) => setDiningHall(e.target.value)}
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
+                    className="w-full bg-[var(--bg-input)] border border-[var(--border-subtle)] p-3 pl-10 pr-10 rounded-xl focus:border-[var(--accent)] outline-none transition-all text-sm appearance-none cursor-pointer"
                   >
                     {DINING_HALLS.map((hall) => (
                       <option key={hall} value={hall}>
@@ -155,18 +211,12 @@ export default function SignupPage() {
                       </option>
                     ))}
                   </select>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)] group-focus-within:text-[var(--accent)] transition-colors">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <path d="m6 9 6 6 6-6" />
                     </svg>
                   </div>
@@ -174,7 +224,12 @@ export default function SignupPage() {
               </div>
 
               {error && (
-                <div className="text-xs p-3 rounded-xl border animate-fade-in text-[var(--danger)] bg-[var(--danger)]/10 border-[var(--danger)]/20">
+                <div className="text-xs p-3 rounded-xl border animate-fade-in text-[var(--danger)] bg-[var(--danger)]/10 border-[var(--danger)]/20 flex items-center gap-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                  </svg>
                   {error}
                 </div>
               )}
@@ -184,7 +239,14 @@ export default function SignupPage() {
                 className="w-full py-3 text-sm font-bold uppercase tracking-widest"
                 disabled={loading}
               >
-                {loading ? "Creating account..." : "Sign up"}
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Creating account...
+                  </span>
+                ) : (
+                  "Sign up"
+                )}
               </Button>
             </form>
 

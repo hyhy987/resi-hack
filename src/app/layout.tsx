@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { Navbar } from "@/components/layout/Navbar";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
   title: "CreditSwap",
@@ -17,8 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased relative">
         <AuthProvider>
-          <Navbar />
-          <main className="relative z-10">{children}</main>
+          <ToastProvider>
+            <Navbar />
+            <main className="relative z-10">{children}</main>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>
