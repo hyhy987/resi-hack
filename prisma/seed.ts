@@ -66,8 +66,67 @@ async function main() {
     },
   });
 
+  // Seed demo listings
+  const now = new Date();
+  const expiry = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+  const listing1 = await prisma.listing.create({
+    data: {
+      userId: "alice",
+      type: "OFFER",
+      creditType: "BREAKFAST",
+      amount: 3,
+      notes: "Have extra breakfast credits this week, happy to swap!",
+      status: "ACTIVE",
+      expiresAt: expiry,
+    },
+  });
+
+  await prisma.listing.create({
+    data: {
+      userId: "bob",
+      type: "REQUEST",
+      creditType: "DINNER",
+      amount: 2,
+      notes: "Running low on dinner credits, can trade breakfast credits",
+      status: "ACTIVE",
+      expiresAt: expiry,
+    },
+  });
+
+  await prisma.listing.create({
+    data: {
+      userId: "charlie",
+      type: "OFFER",
+      creditType: "DINNER",
+      amount: 3,
+      notes: "Won't be eating dinner on campus this week",
+      status: "ACTIVE",
+      expiresAt: expiry,
+    },
+  });
+
+  // Seed a demo swap with messages (Alice's listing, proposed by Bob)
+  const swap = await prisma.swap.create({
+    data: {
+      listingId: listing1.id,
+      proposerId: "bob",
+      counterpartyId: "alice",
+      amount: 2,
+      status: "PROPOSED",
+    },
+  });
+
+  await prisma.swapMessage.create({
+    data: {
+      swapId: swap.id,
+      userId: "bob",
+      message: "Hey Alice! I'd like to swap 2 breakfast credits. Does that work for you?",
+    },
+  });
+
   console.log(
-    "Seeded 4 users: Alice, Bob, Charlie, David (demo password: " +
+    "Seeded 4 users, 3 listings, 1 swap with message (demo password: " +
       DEMO_PASSWORD +
       ")"
   );

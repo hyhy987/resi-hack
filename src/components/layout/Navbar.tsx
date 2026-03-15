@@ -66,7 +66,7 @@ export function Navbar() {
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="!py-1.5"
               >
-                Me
+                {currentUser.name}
               </Button>
               {dropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 py-1 min-w-[140px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-lg animate-fade-in z-50">
