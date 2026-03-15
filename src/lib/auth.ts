@@ -7,7 +7,8 @@ export const COOKIE_NAME = "creditswap-user-id";
 export function setAuthCookie(response: NextResponse, userId: string) {
   response.cookies.set(COOKIE_NAME, userId, {
     path: "/",
-    httpOnly: false,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 30,
   });
@@ -16,7 +17,8 @@ export function setAuthCookie(response: NextResponse, userId: string) {
 export function clearAuthCookie(response: NextResponse) {
   response.cookies.set(COOKIE_NAME, "", {
     path: "/",
-    httpOnly: false,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 0,
   });

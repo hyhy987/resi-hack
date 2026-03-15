@@ -118,10 +118,10 @@ export function ProfileForm({ onSaved }: ProfileFormProps) {
                   type="text"
                   placeholder="E1234567"
                   value={nusId}
-                  onChange={(e) => setNusId(e.target.value.toUpperCase())}
                   maxLength={8}
-                  className={`${inputBase} font-mono`}
-                  required
+                  className={`${inputBase} font-mono opacity-60 cursor-not-allowed`}
+                  readOnly
+                  title="NUSNET ID cannot be changed"
                 />
               </div>
               <div className="space-y-2">

@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   const { nusId, password } = parsed.data;
   const normalizedNusId = nusId.toUpperCase();
 
-  const user = await db.user.findFirst({
+  const user = await db.user.findUnique({
     where: { nusId: normalizedNusId },
     select: {
       id: true,

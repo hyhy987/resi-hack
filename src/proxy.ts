@@ -21,14 +21,25 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api/auth/")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/api/")) {
+    if (!hasAuthCookie) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
     return NextResponse.next();
   }
 
   if (isPublicPath(pathname)) {
     if (hasAuthCookie) {
       const redirect = request.nextUrl.searchParams.get("redirect");
-      return NextResponse.redirect(new URL(redirect || "/", request.url));
+      const safeRedirect =
+        redirect && redirect.startsWith("/") && !redirect.startsWith("//")
+          ? redirect
+          : "/";
+      return NextResponse.redirect(new URL(safeRedirect, request.url));
     }
     return NextResponse.next();
   }

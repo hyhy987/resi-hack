@@ -11,7 +11,11 @@ function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { refreshUser } = useAuth();
-  const redirect = searchParams.get("redirect") || "/";
+  const rawRedirect = searchParams.get("redirect") || "/";
+  const redirect =
+    rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/";
 
   const [nusId, setNusId] = useState("");
   const [password, setPassword] = useState("");

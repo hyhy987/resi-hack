@@ -20,7 +20,7 @@ CREATE TABLE "new_User" (
     "contactHandle" TEXT NOT NULL DEFAULT '',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-INSERT INTO "new_User" ("breakfastCredits", "contactHandle", "createdAt", "diningHall", "dinnerCredits", "id", "name", "nusId") SELECT "breakfastCredits", "contactHandle", "createdAt", "diningHall", "dinnerCredits", "id", "name", "nusId" FROM "User";
+INSERT INTO "new_User" ("breakfastCredits", "contactHandle", "createdAt", "diningHall", "dinnerCredits", "id", "name", "nusId", "passwordHash") SELECT "breakfastCredits", coalesce("contactHandle", ''), "createdAt", coalesce("diningHall", 'RVRC'), "dinnerCredits", "id", "name", coalesce("nusId", 'UNKNOWN_' || "id"), '$2a$10$placeholder' FROM "User";
 DROP TABLE "User";
 ALTER TABLE "new_User" RENAME TO "User";
 CREATE UNIQUE INDEX "User_nusId_key" ON "User"("nusId");

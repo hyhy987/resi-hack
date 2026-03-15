@@ -11,7 +11,7 @@ export type SwapStatus =
 export interface UserData {
   id: string;
   name: string;
-  nusId?: string;
+  nusId: string;
   diningHall: string;
   breakfastCredits: number;
   dinnerCredits: number;

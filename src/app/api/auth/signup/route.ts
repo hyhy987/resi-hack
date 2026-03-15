@@ -27,37 +27,42 @@ export async function POST(req: NextRequest) {
     const { nusId, password, name, diningHall, contactHandle } = parsed.data;
     const normalizedNusId = nusId.toUpperCase();
 
-    const existing = await db.user.findFirst({
-      where: { nusId: normalizedNusId },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: "An account with this NUSNET ID already exists" },
-        { status: 409 }
-      );
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await db.user.create({
-      data: {
-        name,
-        nusId: normalizedNusId,
-        passwordHash,
-        diningHall,
-        contactHandle: contactHandle ?? "",
-      },
-      select: {
-        id: true,
-        name: true,
-        nusId: true,
-        diningHall: true,
-        breakfastCredits: true,
-        dinnerCredits: true,
-        contactHandle: true,
-      },
-    });
+    let user;
+    try {
+      user = await db.user.create({
+        data: {
+          name,
+          nusId: normalizedNusId,
+          passwordHash,
+          diningHall,
+          contactHandle: contactHandle ?? "",
+        },
+        select: {
+          id: true,
+          name: true,
+          nusId: true,
+          diningHall: true,
+          breakfastCredits: true,
+          dinnerCredits: true,
+          contactHandle: true,
+        },
+      });
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: string }).code === "P2002"
+      ) {
+        return NextResponse.json(
+          { error: "An account with this NUSNET ID already exists" },
+          { status: 409 }
+        );
+      }
+      throw err;
+    }
 
     const response = NextResponse.json({ user });
     setAuthCookie(response, user.id);
@@ -65,7 +70,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Signup error:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Sign up failed" },
+      { error: "Sign up failed" },
       { status: 500 }
     );
   }
