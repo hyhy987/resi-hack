@@ -47,6 +47,7 @@ function ListingDetailPageContent() {
   const [loading, setLoading] = useState(true);
   const [proposing, setProposing] = useState(false);
   const [error, setError] = useState("");
+  const [matches, setMatches] = useState<any[]>([]);
 
   const fetchListing = useCallback(async () => {
     const res = await fetch(`/api/listings/${id}`);
@@ -59,6 +60,15 @@ function ListingDetailPageContent() {
   useEffect(() => {
     fetchListing();
   }, [fetchListing]);
+
+  // Fetch auto-matches
+  useEffect(() => {
+    if (!id) return;
+    fetch(`/api/listings/matches?listingId=${id}`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setMatches)
+      .catch(() => {});
+  }, [id]);
 
   const handlePropose = async () => {
     if (!currentUser || !listing) return;
@@ -319,6 +329,52 @@ function ListingDetailPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Auto-match suggestions */}
+      {matches.length > 0 && listing.status === "ACTIVE" && (
+        <div className="mt-8 animate-fade-in-up stagger-4">
+          <div className="flex items-center gap-2 mb-4">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <h3 className="text-sm font-bold font-[Outfit] text-[var(--text-primary)]">
+              Suggested Matches
+            </h3>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[var(--warning)]/10 text-[var(--warning)] border border-[var(--warning)]/15">
+              {matches.length} found
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {matches.map((match: any) => (
+              <Link
+                key={match.id}
+                href={`/listing/${match.id}`}
+                className="glass-card p-4 group"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${match.type === "OFFER" ? "bg-[var(--offer-green-bg)] text-[var(--offer-green)]" : "bg-[var(--request-blue-bg)] text-[var(--request-blue)]"}`}>
+                    {match.type === "OFFER" ? "Offering" : "Requesting"}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase text-[var(--text-muted)]">
+                    {match.creditType.toLowerCase()}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-1">
+                  <span className={`text-2xl font-black font-[Outfit] ${match.type === "OFFER" ? "text-[var(--offer-green)]" : "text-[var(--request-blue)]"}`}>
+                    {match.amount}
+                  </span>
+                  <span className="text-xs text-[var(--text-muted)]">
+                    {match.amount === 1 ? "credit" : "credits"}
+                  </span>
+                </div>
+                <p className="text-xs text-[var(--text-muted)]">
+                  by {match.user.name}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }

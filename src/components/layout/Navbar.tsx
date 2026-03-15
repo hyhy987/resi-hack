@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
 import { Button } from "@/components/ui/Button";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 function SunriseIcon() {
   return (
@@ -91,6 +92,26 @@ export function Navbar() {
                 Marketplace
               </Link>
               <Link
+                href="/history"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium font-[Outfit] transition-all duration-200 ${
+                  pathname === "/history"
+                    ? "text-[var(--accent)] bg-[var(--accent)]/10"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                History
+              </Link>
+              <Link
+                href="/analytics"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium font-[Outfit] transition-all duration-200 ${
+                  pathname === "/analytics"
+                    ? "text-[var(--accent)] bg-[var(--accent)]/10"
+                    : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                }`}
+              >
+                Analytics
+              </Link>
+              <Link
                 href="/profile"
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium font-[Outfit] transition-all duration-200 ${
                   pathname === "/profile"
@@ -127,6 +148,8 @@ export function Navbar() {
               </div>
             </div>
           )}
+
+          {currentUser && <NotificationBell />}
 
           {loading ? (
             <div className="w-24 h-9 rounded-xl bg-[var(--bg-surface)] animate-pulse" />
@@ -182,6 +205,29 @@ export function Navbar() {
                   >
                     <UserIcon />
                     Profile
+                  </Link>
+                  <Link
+                    href="/history"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    History
+                  </Link>
+                  <Link
+                    href="/analytics"
+                    onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    Analytics
                   </Link>
                   <div className="mx-3 my-1 border-t border-[var(--border-subtle)]" />
                   <button
