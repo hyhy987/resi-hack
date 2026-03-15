@@ -1,7 +1,28 @@
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { db } from "./db";
 
-const COOKIE_NAME = "creditswap-user-id";
+export const COOKIE_NAME = "creditswap-user-id";
+
+export function setAuthCookie(response: NextResponse, userId: string) {
+  response.cookies.set(COOKIE_NAME, userId, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 30,
+  });
+}
+
+export function clearAuthCookie(response: NextResponse) {
+  response.cookies.set(COOKIE_NAME, "", {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+  });
+}
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();

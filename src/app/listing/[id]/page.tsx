@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Badge, statusColor } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
+import { formatExpiryWithSuffix } from "@/lib/format";
 import Link from "next/link";
 
 interface ListingDetail {
@@ -33,10 +34,12 @@ interface ListingDetail {
   }[];
 }
 
-export default function ListingDetailPage() {
+function ListingDetailPageContent() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params.id as string;
+  const fromTab = searchParams.get("fromTab") || "OFFER";
   const { currentUser, refreshUser } = useAuth();
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,14 +83,6 @@ export default function ListingDetailPage() {
     router.push(`/swap/${swap.id}`);
   };
 
-  const formatExpiry = (expiresAt: string) => {
-    const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return "Expired";
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    return hours > 0 ? `${hours}h ${mins}m remaining` : `${mins}m remaining`;
-  };
-
   if (loading)
     return (
       <PageContainer>
@@ -125,7 +120,7 @@ export default function ListingDetailPage() {
     <PageContainer>
       <div className="mb-6 animate-fade-in">
         <Link
-          href="/"
+          href={`/?tab=${fromTab}`}
           className="text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors font-[Outfit]"
         >
           &larr; Back to Marketplace
@@ -167,7 +162,7 @@ export default function ListingDetailPage() {
           )}
 
           <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
-            <span>{formatExpiry(listing.expiresAt)}</span>
+            <span>{formatExpiryWithSuffix(listing.expiresAt)}</span>
             <span className="opacity-30">&middot;</span>
             <span>
               Posted {new Date(listing.createdAt).toLocaleDateString()}
@@ -273,5 +268,21 @@ export default function ListingDetailPage() {
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+export default function ListingDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <PageContainer>
+          <div className="text-center py-20 text-[var(--text-muted)]">
+            Loading...
+          </div>
+        </PageContainer>
+      }
+    >
+      <ListingDetailPageContent />
+    </Suspense>
   );
 }

@@ -1,17 +1,24 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/AuthProvider";
-import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 export function Navbar() {
-  const { currentUser, allUsers, switchUser, loading } = useAuth();
-  const pathname = usePathname();
+  const { currentUser, logout, loading } = useAuth();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isActive = (path: string) =>
-    pathname === path
-      ? "text-[var(--accent)] font-medium"
-      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]";
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/80 backdrop-blur-xl animate-slide-down">
@@ -25,28 +32,11 @@ export function Navbar() {
               CreditSwap
             </span>
           </Link>
-
-          <div className="hidden sm:flex items-center gap-1">
-            <Link
-              href="/"
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${isActive("/")}`}
-            >
-              Marketplace
-            </Link>
-            <Link
-              href="/profile"
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${isActive("/profile")}`}
-            >
-              Profile
-            </Link>
-          </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* --- DUAL CREDIT DISPLAY --- */}
           {currentUser && (
             <div className="hidden md:flex items-center gap-2">
-              {/* Breakfast Pill */}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                 <span className="text-[10px]" title="Breakfast">
                   Breakfast:
@@ -55,8 +45,6 @@ export function Navbar() {
                   {currentUser.breakfastCredits || 0}
                 </span>
               </div>
-
-              {/* Dinner Pill */}
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
                 <span className="text-[10px]" title="Dinner">
                   Dinner:
@@ -68,20 +56,47 @@ export function Navbar() {
             </div>
           )}
 
-          {/* User Switcher */}
-          <select
-            value={currentUser?.id || ""}
-            onChange={(e) => switchUser(e.target.value)}
-            disabled={loading}
-            className="text-sm !rounded-xl !px-3 !py-1.5 !bg-[var(--bg-surface)] !border-[var(--border)] cursor-pointer min-w-[140px] focus:ring-2 focus:ring-[var(--accent)]/20 outline-none"
-          >
-            {!currentUser && <option value="">Select user</option>}
-            {allUsers.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-              </option>
-            ))}
-          </select>
+          {loading ? (
+            <div className="w-24 h-9 rounded-xl bg-[var(--bg-surface)] animate-pulse" />
+          ) : currentUser ? (
+            <div className="relative" ref={dropdownRef}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="!py-1.5"
+              >
+                Me
+              </Button>
+              {dropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 py-1 min-w-[140px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] shadow-lg animate-fade-in z-50">
+                  <Link
+                    href="/profile"
+                    onClick={() => setDropdownOpen(false)}
+                    className="block px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDropdownOpen(false);
+                      logout();
+                    }}
+                    className="block w-full text-left px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]"
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <Link href="/login">
+              <Button variant="primary" size="sm">
+                Log in
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
     | "DINNER"
     | null;
   const userIdParam = searchParams.get("userId");
+  const sort = searchParams.get("sort") as "newest" | "expiring" | null;
 
   const now = new Date();
 
@@ -33,18 +34,23 @@ export async function GET(req: NextRequest) {
 
   if (userIdParam) {
     where = {
-      OR: [
-        { userId: userIdParam },
+      AND: [
         {
-          swaps: {
-            some: {
-              OR: [
-                { proposerId: userIdParam },
-                { counterpartyId: userIdParam },
-              ],
+          OR: [
+            { userId: userIdParam },
+            {
+              swaps: {
+                some: {
+                  OR: [
+                    { proposerId: userIdParam },
+                    { counterpartyId: userIdParam },
+                  ],
+                },
+              },
             },
-          },
+          ],
         },
+        ...(creditType ? [{ creditType }] : []),
       ],
     };
   } else {
@@ -53,11 +59,15 @@ export async function GET(req: NextRequest) {
       user: { diningHall: user.diningHall },
     };
     if (type) where.type = type;
-    if (creditType) where.creditType = creditType; // Filter by meal type
+    if (creditType) where.creditType = creditType;
   }
+
+  const orderBy: Prisma.ListingOrderByWithRelationInput =
+    sort === "expiring" ? { expiresAt: "asc" } : { createdAt: "desc" };
 
   const listings = await db.listing.findMany({
     where,
+    orderBy,
     include: {
       user: {
         select: {
@@ -80,7 +90,6 @@ export async function GET(req: NextRequest) {
         },
       },
     },
-    orderBy: { createdAt: "desc" },
   });
 
   return NextResponse.json(listings);
@@ -109,7 +118,9 @@ export async function POST(req: NextRequest) {
 
   if (todayCount >= MAX_DAILY_LISTINGS) {
     return NextResponse.json(
-      { error: `Max ${MAX_DAILY_LISTINGS} listings per day` },
+      {
+        error: `You've reached the limit of ${MAX_DAILY_LISTINGS} listings per day. Try again tomorrow.`,
+      },
       { status: 429 },
     );
   }
