@@ -93,7 +93,8 @@ function ListingsPageContent() {
       setLoading(false);
       return;
     }
-    setLoading(true);
+    // Only show loading skeletons on initial load, not on tab switches
+    if (listings.length === 0) setLoading(true);
     const params = new URLSearchParams();
     if (activeTab === "mine" && currentUser) {
       params.set("userId", currentUser.id);
