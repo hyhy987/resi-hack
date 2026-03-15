@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { MAX_CREDITS } from "@/lib/constants";
 import { Prisma } from "@prisma/client";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   _req: NextRequest,
@@ -111,6 +112,29 @@ export async function POST(
 
       return tx.swap.update({ where: { id }, data: updateData });
     });
+
+    // Notify the other party
+    const otherUserId =
+      result.proposerId === user.id ? result.counterpartyId : result.proposerId;
+
+    if (result.status === "COMPLETED") {
+      // Notify both parties
+      await createNotification({
+        userId: otherUserId,
+        type: "SWAP_COMPLETED",
+        title: "Swap completed",
+        message: `Your swap has been completed! Credits have been transferred.`,
+        linkUrl: `/swap/${id}`,
+      });
+    } else {
+      await createNotification({
+        userId: otherUserId,
+        type: "SWAP_CONFIRMED",
+        title: "Partner confirmed transfer",
+        message: `${user.name} has confirmed the transfer. Please confirm on your end.`,
+        linkUrl: `/swap/${id}`,
+      });
+    }
 
     return NextResponse.json(result);
   } catch (e: any) {

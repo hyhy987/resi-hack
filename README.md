@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CreditSwap
+
+A peer-to-peer dining credit marketplace for NUS residential college students. Students can list excess meal credits (breakfast or dinner), browse listings from their dining hall, propose swaps, and confirm transfers — all through a clean, real-time web interface.
+
+## Features
+
+- **Listings marketplace** — Create offers or requests for breakfast/dinner credits, filtered by dining hall and credit type, with 48-hour auto-expiry and daily rate limiting
+- **Swap workflow** — Propose, accept, and dual-confirm swaps with atomic credit transfers and balance validation
+- **In-app messaging** — Chat with counterparties within each swap to coordinate details
+- **Authentication** — Sign up and log in with NUSNET ID and password (bcrypt-hashed)
+- **Profile management** — View/edit personal info, dining hall, Telegram handle, and credit balances; dining hall changes auto-cancel active swaps with user confirmation
+
+## Tech Stack
+
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- **Backend:** Next.js API routes, Zod validation, middleware auth
+- **Database:** SQLite via Prisma ORM
+- **Auth:** bcryptjs password hashing, httpOnly secure cookies
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate deploy
+
+# Seed demo data
+npm run db:seed
+
+# Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo Accounts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Name    | NUSNET ID  | Password      | Dining Hall |
+|---------|-----------|---------------|-------------|
+| Alice   | E1430273  | password123   | RVRC        |
+| Bob     | E1837291  | password123   | RVRC        |
+| Charlie | E1038391  | password123   | RVRC        |
+| David   | E1182743  | password123   | Cendana     |
 
-## Learn More
+### Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run db:seed` | Seed database with demo users and listings |
+| `npm run db:reset` | Reset database and re-run migrations |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── api/           # API routes (auth, listings, swaps, profile)
+│   ├── listing/[id]/  # Listing detail page
+│   ├── swap/[id]/     # Swap detail + messaging page
+│   ├── login/         # Login page
+│   ├── signup/        # Signup page
+│   ├── profile/       # Profile view/edit page
+│   └── page.tsx       # Home — marketplace listings
+├── components/        # Reusable UI components
+├── lib/               # Auth, DB, constants, validations, formatting
+├── providers/         # AuthProvider context
+└── types/             # TypeScript interfaces
+prisma/
+├── schema.prisma      # Database schema
+├── seed.ts            # Demo data seeder
+└── migrations/        # SQL migrations
+```
 
-## Deploy on Vercel
+## Team
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built for the NUS Residential College Hackathon 2026.

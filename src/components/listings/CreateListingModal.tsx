@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import {
   MAX_SWAP_AMOUNT,
   MAX_DAILY_LISTINGS,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function CreateListingModal({ open, onClose, onCreated }: Props) {
+  const { toast } = useToast();
   const [type, setType] = useState<"OFFER" | "REQUEST">("OFFER");
   const [creditType, setCreditType] = useState<"BREAKFAST" | "DINNER">(
     "BREAKFAST",
@@ -83,6 +85,7 @@ export function CreateListingModal({ open, onClose, onCreated }: Props) {
 
     setSubmitting(false);
     setShowSuccess(true);
+    toast("Listing published successfully!", "success");
     setTimeout(() => {
       setType("OFFER");
       setCreditType("BREAKFAST");

@@ -221,3 +221,131 @@ select:focus {
 ::placeholder {
   color: var(--text-muted) !important;
 }
+
+/* smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* focus-visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--accent-glow);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+}
+
+/* gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent) 0%, #d4a853 50%, var(--request-blue) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* card glow effects */
+.glow-green:hover {
+  box-shadow: 0 8px 32px rgba(129, 178, 154, 0.15), 0 0 0 1px rgba(129, 178, 154, 0.1);
+}
+
+.glow-blue:hover {
+  box-shadow: 0 8px 32px rgba(105, 152, 171, 0.15), 0 0 0 1px rgba(105, 152, 171, 0.1);
+}
+
+/* shimmer effect on hover */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-on-hover:hover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* toast animations */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+}
+
+.animate-toast-in {
+  animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-toast-out {
+  animation: toastOut 0.2s ease-in both;
+}
+
+/* zoom-in for modals */
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-zoom-in {
+  animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* count-up number animation */
+@keyframes countPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.animate-count-pulse {
+  animation: countPulse 0.3s ease-out;
+}
+
+/* progress bar for toast */
+@keyframes progressShrink {
+  from { width: 100%; }
+  to { width: 0; }
+}
