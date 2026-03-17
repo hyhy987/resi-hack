@@ -47,14 +47,63 @@ function ListingCardSkeleton() {
 
 function EmptyStateIllustration() {
   return (
-    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" className="mx-auto mb-6 opacity-30">
+    <svg
+      width="120"
+      height="120"
+      viewBox="0 0 120 120"
+      fill="none"
+      className="mx-auto mb-6 opacity-30"
+    >
       {/* Stylized empty box / marketplace */}
-      <rect x="20" y="35" width="80" height="60" rx="8" stroke="var(--text-muted)" strokeWidth="2" strokeDasharray="6 4" />
-      <path d="M20 55h80" stroke="var(--text-muted)" strokeWidth="1.5" strokeDasharray="4 3" />
-      <circle cx="45" cy="75" r="8" stroke="var(--offer-green)" strokeWidth="1.5" opacity="0.5" />
-      <circle cx="75" cy="75" r="8" stroke="var(--request-blue)" strokeWidth="1.5" opacity="0.5" />
-      <path d="M55 28l5-8 5 8" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.6" />
-      <line x1="60" y1="28" x2="60" y2="35" stroke="var(--accent)" strokeWidth="2" opacity="0.6" />
+      <rect
+        x="20"
+        y="35"
+        width="80"
+        height="60"
+        rx="8"
+        stroke="var(--text-muted)"
+        strokeWidth="2"
+        strokeDasharray="6 4"
+      />
+      <path
+        d="M20 55h80"
+        stroke="var(--text-muted)"
+        strokeWidth="1.5"
+        strokeDasharray="4 3"
+      />
+      <circle
+        cx="45"
+        cy="75"
+        r="8"
+        stroke="var(--offer-green)"
+        strokeWidth="1.5"
+        opacity="0.5"
+      />
+      <circle
+        cx="75"
+        cy="75"
+        r="8"
+        stroke="var(--request-blue)"
+        strokeWidth="1.5"
+        opacity="0.5"
+      />
+      <path
+        d="M55 28l5-8 5 8"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.6"
+      />
+      <line
+        x1="60"
+        y1="28"
+        x2="60"
+        y2="35"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        opacity="0.6"
+      />
     </svg>
   );
 }
@@ -92,7 +141,16 @@ export function ListingsGrid({
         {onCreateClick && canCreate && (
           <Button onClick={onCreateClick} size="md">
             <span className="flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
@@ -106,7 +164,7 @@ export function ListingsGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {listings.map((listing, index) => (
+      {(Array.isArray(listings) ? listings : []).map((listing, index) => (
         <ListingCard
           key={listing.id}
           listing={listing}
