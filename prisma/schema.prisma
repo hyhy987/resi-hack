@@ -21,6 +21,7 @@ model User {
   proposedSwaps    Swap[]       @relation("proposer")
   receivedSwaps    Swap[]       @relation("counterparty")
   messages         SwapMessage[]
+  notifications    Notification[]
 }
 
 model Listing {
@@ -60,5 +61,17 @@ model SwapMessage {
   message   String
   createdAt DateTime @default(now())
   swap      Swap     @relation(fields: [swapId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // SWAP_PROPOSED, SWAP_ACCEPTED, SWAP_CONFIRMED, SWAP_COMPLETED, SWAP_CANCELLED, NEW_MESSAGE, AUTO_MATCH
+  title     String
+  message   String
+  linkUrl   String   @default("")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 }

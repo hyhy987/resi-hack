@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
+import { useToast } from "@/components/ui/Toast";
 import { DINING_HALLS, MAX_CREDITS } from "@/lib/constants";
 
 interface ProfileFormProps {
@@ -11,6 +12,7 @@ interface ProfileFormProps {
 
 export function ProfileForm({ onSaved }: ProfileFormProps) {
   const { currentUser, refreshUser } = useAuth();
+  const { toast } = useToast();
 
   const [name, setName] = useState("");
   const [nusId, setNusId] = useState("");
@@ -70,6 +72,7 @@ export function ProfileForm({ onSaved }: ProfileFormProps) {
 
       if (res.ok) {
         setShowSuccess(true);
+        toast("Profile updated successfully!", "success");
         await refreshUser();
         onSaved?.();
       } else if (res.status === 409 && data.error === "ACTIVE_SWAPS_FOUND") {

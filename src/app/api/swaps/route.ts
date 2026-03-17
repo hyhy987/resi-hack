@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createSwapSchema } from "@/lib/validations";
 import { MAX_CREDITS } from "@/lib/constants";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -93,6 +94,15 @@ export async function POST(req: NextRequest) {
       });
 
       return swap;
+    });
+
+    // Notify listing owner about the swap proposal
+    await createNotification({
+      userId: result.counterparty.id,
+      type: "SWAP_PROPOSED",
+      title: "New swap proposal",
+      message: `${user.name} proposed a swap for your ${result.listing.creditType.toLowerCase()} credit listing`,
+      linkUrl: `/swap/${result.id}`,
     });
 
     return NextResponse.json(result, { status: 201 });

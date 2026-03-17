@@ -103,10 +103,12 @@ export function ListingCard({
     ? `/swap/${mySwap.id}`
     : `/listing/${l.id}?fromTab=${encodeURIComponent(fromTab)}`;
 
+  const glowClass = isOffer ? "glow-green" : "glow-blue";
+
   return (
     <Link
       href={href}
-      className={`glass-card p-4 flex flex-col group relative overflow-hidden transition-all duration-300 hover:border-[var(--accent)]/50 animate-fade-in-up stagger-${Math.min(index + 1, 8)} ${isMine ? "border-l-4 border-l-[var(--accent)]" : ""} ${hasActionItem ? "ring-1 ring-[var(--accent)]/40" : ""}`}
+      className={`glass-card shimmer-on-hover ${glowClass} p-4 flex flex-col group relative overflow-hidden transition-all duration-300 hover:border-[var(--accent)]/50 animate-fade-in-up stagger-${Math.min(index + 1, 8)} ${isMine ? "border-l-4 border-l-[var(--accent)]" : ""} ${hasActionItem ? "ring-1 ring-[var(--accent)]/40" : ""}`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex gap-1.5 flex-wrap">
@@ -115,9 +117,22 @@ export function ListingCard({
           </Badge>
           {isMine && <Badge color="accent">OWNER</Badge>}
           <span
-            className="text-[10px] font-bold uppercase tracking-tight text-[var(--text-muted)] px-2 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-subtle)]"
+            className={`text-[10px] font-bold uppercase tracking-tight px-2 py-0.5 rounded border flex items-center gap-1 ${
+              l.creditType === "BREAKFAST"
+                ? "text-[var(--warning)] bg-[var(--warning)]/8 border-[var(--warning)]/15"
+                : "text-[var(--request-blue)] bg-[var(--request-blue-bg)] border-[var(--request-blue)]/15"
+            }`}
             title={l.creditType}
           >
+            {l.creditType === "BREAKFAST" ? (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v4" /><path d="m4.93 10.93 1.41 1.41" /><path d="M2 18h2" /><path d="M20 18h2" /><path d="m19.07 10.93-1.41 1.41" /><path d="M22 22H2" /><path d="M16 18a4 4 0 0 0-8 0" />
+              </svg>
+            ) : (
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+            )}
             {l.creditType === "BREAKFAST" ? "Breakfast" : "Dinner"}
           </span>
         </div>

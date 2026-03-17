@@ -8,6 +8,7 @@ import { SwapActions } from "@/components/swaps/SwapActions";
 import { SwapMessages } from "@/components/swaps/SwapMessages";
 import { SwapInstructions } from "@/components/swaps/SwapInstructions";
 import { SwapData } from "@/types";
+import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/providers/AuthProvider";
 import Link from "next/link";
 
@@ -41,8 +42,18 @@ export default function SwapDetailPage() {
   if (!swap)
     return (
       <PageContainer>
-        <div className="text-center py-20 text-[var(--text-muted)] animate-fade-in">
-          Swap not found
+        <div className="text-center py-20 animate-fade-in">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-40">
+            <path d="M17 1l4 4-4 4" />
+            <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+            <path d="M7 23l-4-4 4-4" />
+            <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+          </svg>
+          <p className="text-[var(--text-muted)] font-[Outfit] text-lg mb-2">Swap not found</p>
+          <p className="text-sm text-[var(--text-muted)] opacity-60 mb-4">It may have been cancelled or completed.</p>
+          <Link href="/">
+            <Button variant="secondary" size="sm">Back to Marketplace</Button>
+          </Link>
         </div>
       </PageContainer>
     );
@@ -60,9 +71,12 @@ export default function SwapDetailPage() {
       <div className="mb-6 animate-fade-in">
         <Link
           href="/"
-          className="text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors font-[Outfit]"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors font-[Outfit] group"
         >
-          &larr; Back to Marketplace
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+          Back to Marketplace
         </Link>
       </div>
 

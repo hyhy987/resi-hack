@@ -5,6 +5,7 @@ import { createListingSchema } from "@/lib/validations";
 import { MAX_DAILY_LISTINGS, EXPIRY_HOURS } from "@/lib/constants";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
@@ -138,6 +139,29 @@ export async function POST(req: NextRequest) {
     },
     include: { user: { select: { id: true, name: true, diningHall: true } } },
   });
+
+  // Check for auto-matches and notify the listing creator
+  const complementaryType = listing.type === "OFFER" ? "REQUEST" : "OFFER";
+  const matchCount = await db.listing.count({
+    where: {
+      type: complementaryType,
+      creditType: listing.creditType,
+      status: "ACTIVE",
+      userId: { not: user.id },
+      user: { diningHall: user.diningHall },
+      expiresAt: { gt: new Date() },
+    },
+  });
+
+  if (matchCount > 0) {
+    await createNotification({
+      userId: user.id,
+      type: "AUTO_MATCH",
+      title: `${matchCount} matching ${complementaryType.toLowerCase()}${matchCount > 1 ? "s" : ""} found`,
+      message: `We found ${matchCount} ${complementaryType.toLowerCase()}${matchCount > 1 ? "s" : ""} matching your ${listing.creditType.toLowerCase()} credit ${listing.type.toLowerCase()}`,
+      linkUrl: `/listing/${listing.id}`,
+    });
+  }
 
   return NextResponse.json(listing, { status: 201 });
 }

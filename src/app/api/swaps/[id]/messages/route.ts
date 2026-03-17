@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { sendMessageSchema } from "@/lib/validations";
+import { createNotification } from "@/lib/notifications";
 
 export async function GET(
   _req: NextRequest,
@@ -51,6 +52,18 @@ export async function POST(
       message: parsed.data.message,
     },
     include: { user: { select: { id: true, name: true } } },
+  });
+
+  // Notify the other party about the new message
+  const otherUserId =
+    swap.proposerId === user.id ? swap.counterpartyId : swap.proposerId;
+
+  await createNotification({
+    userId: otherUserId,
+    type: "NEW_MESSAGE",
+    title: "New message",
+    message: `${user.name}: ${parsed.data.message.substring(0, 80)}${parsed.data.message.length > 80 ? "..." : ""}`,
+    linkUrl: `/swap/${id}`,
   });
 
   return NextResponse.json(message, { status: 201 });

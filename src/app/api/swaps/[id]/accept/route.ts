@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { createNotification } from "@/lib/notifications";
 
 export async function POST(
   _req: NextRequest,
@@ -38,6 +39,15 @@ export async function POST(
   const updated = await db.swap.update({
     where: { id },
     data: { status: "ACCEPTED" },
+  });
+
+  // Notify the proposer that their swap was accepted
+  await createNotification({
+    userId: swap.proposerId,
+    type: "SWAP_ACCEPTED",
+    title: "Swap accepted",
+    message: `${user.name} accepted your swap proposal`,
+    linkUrl: `/swap/${id}`,
   });
 
   return NextResponse.json(updated);
