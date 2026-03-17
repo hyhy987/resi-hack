@@ -51,6 +51,14 @@ export async function GET(req: NextRequest) {
             },
           ],
         },
+        { status: { notIn: ["COMPLETED", "CANCELLED"] } },
+        {
+          swaps: {
+            none: {
+              status: "COMPLETED",
+            },
+          },
+        },
         ...(creditType ? [{ creditType }] : []),
       ],
     };

@@ -21,50 +21,6 @@ const tabs = [
 type CreditTypeFilterValue = "all" | "BREAKFAST" | "DINNER";
 type SortValue = "newest" | "expiring";
 
-function StatsBar({ listings, loading, activeTab }: { listings: ListingData[]; loading: boolean; activeTab: string }) {
-  const stats = useMemo(() => {
-    if (loading || !listings.length) return null;
-    const activeListings = listings.filter((l) => l.status === "ACTIVE");
-    const offers = activeListings.filter((l) => l.type === "OFFER");
-    const requests = activeListings.filter((l) => l.type === "REQUEST");
-    const totalCredits = activeListings.reduce((sum, l) => sum + l.amount, 0);
-    return {
-      offers: offers.length,
-      requests: requests.length,
-      totalCredits,
-      total: activeListings.length,
-    };
-  }, [listings, loading]);
-
-  if (!stats) return null;
-
-  return (
-    <div className="flex items-center gap-4 mb-6 animate-fade-in-up stagger-1">
-      {(activeTab === "mine" || activeTab === "OFFER") && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--offer-green-bg)] border border-[var(--offer-green)]/15">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--offer-green)]" />
-          <span className="text-[11px] font-bold font-[Outfit] text-[var(--offer-green)]">
-            {stats.offers} active offer{stats.offers !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
-      {(activeTab === "mine" || activeTab === "REQUEST") && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--request-blue-bg)] border border-[var(--request-blue)]/15">
-          <div className="w-1.5 h-1.5 rounded-full bg-[var(--request-blue)]" />
-          <span className="text-[11px] font-bold font-[Outfit] text-[var(--request-blue)]">
-            {stats.requests} active request{stats.requests !== 1 ? "s" : ""}
-          </span>
-        </div>
-      )}
-      <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
-        <span className="text-[11px] font-bold font-[Outfit] text-[var(--text-secondary)]">
-          {stats.totalCredits} credits listed
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function ListingsPageContent() {
   const { currentUser } = useAuth();
   const searchParams = useSearchParams();
@@ -132,16 +88,14 @@ function ListingsPageContent() {
         </p>
       </div>
 
-      {/* Stats summary */}
-      <StatsBar listings={listings} loading={loading} activeTab={activeTab} />
-
       {/* Controls bar */}
       <div className="flex flex-col gap-4 mb-6 animate-fade-in-up stagger-2">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <Tabs
             tabs={tabs.map((t) => ({
               ...t,
-              count: activeTab === t.key && !loading ? listings.length : undefined,
+              count:
+                activeTab === t.key && !loading ? listings.length : undefined,
             }))}
             active={activeTab}
             onChange={setActiveTab}
@@ -152,7 +106,16 @@ function ListingsPageContent() {
             size="md"
           >
             <span className="flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
