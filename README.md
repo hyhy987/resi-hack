@@ -17,50 +17,131 @@ A peer-to-peer dining credit marketplace for NUS residential college students. S
 - **Database:** SQLite via Prisma ORM
 - **Auth:** bcryptjs password hashing, httpOnly secure cookies
 
-## Getting Started
+## Setup Instructions
 
 ### Prerequisites
 
-- Node.js 18+
-- npm
+- **Node.js** 18+ and npm (or yarn/pnpm/bun)
+- **Git** (for cloning)
 
-### Setup
+### 1. Clone and install dependencies
 
 ```bash
-# Install dependencies
+git clone <your-repo-url>
+cd resi-hack
 npm install
+```
 
-# Generate Prisma client
+### 2. Set up the database
+
+The app uses SQLite with Prisma. No environment variables are required for local development.
+
+```bash
+# Generate Prisma client and run migrations
 npx prisma generate
+npx prisma migrate dev
 
-# Run migrations
-npx prisma migrate deploy
+# Seed demo users for testing
+npx tsx prisma/seed.ts
+```
 
-# Seed demo data
-npm run db:seed
+### 3. Run the development server
 
-# Start dev server
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) on Google Chrome.
 
 ### Demo Accounts
 
 | Name    | NUSNET ID  | Password      | Dining Hall |
-|---------|-----------|---------------|-------------|
-| Alice   | E1430273  | password123   | RVRC        |
-| Bob     | E1837291  | password123   | RVRC        |
-| Charlie | E1038391  | password123   | RVRC        |
-| David   | E1182743  | password123   | Cendana     |
+|---------|------------|---------------|-------------|
+| Alice   | E1430273   | password123   | RVRC        |
+| Bob     | E1837291   | password123   | RVRC        |
+| Charlie | E1038391   | password123   | RVRC        |
+| David   | E1182743   | password123   | Cendana     |
 
-### Scripts
+### 4. Build for production (optional)
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## User Guide
+
+### Sign up
+
+1. Go to **Sign up** (or `/signup`).
+2. Enter your **NUSNET ID** (e.g. E1234567), **password**, **full name**, and **dining hall**.
+3. Click **Sign up**. You'll be logged in and redirected to the marketplace.
+
+![Screenshot: Sign up page](docs/screenshots/signup.png)
+
+### Log in
+
+1. Go to **Log in** (or `/login`).
+2. Enter your **NUSNET ID** and **password**.
+3. Click **Log in**.
+
+![Screenshot: Login page](docs/screenshots/login.png)
+
+### Profile
+
+1. Click **Profile** in the navbar (requires login).
+2. View your **name**, **NUSNET ID**, **dining hall**, **Telegram handle**, and **credit balance**.
+3. Click **Edit** to update your Telegram handle and credit balance.
+
+![Screenshot: Profile page](docs/screenshots/profile.png)
+
+### Browse the marketplace
+
+1. On the home page, use the tabs: **Offers**, **Requests**, or **My Listings**.
+2. Filter by **Breakfast** or **Dinner** credits.
+3. Sort by **Newest first** or **Expiring soon**.
+4. Click a listing card to open its details.
+
+![Screenshot: Marketplace home](docs/screenshots/marketplace.png)
+
+### Create a listing
+
+1. Click **+ New Listing** (requires login).
+2. Choose **Offer** (you have credits to give) or **Request** (you need credits).
+3. Select **Breakfast** or **Dinner**, enter the **amount** (1–3 credits), and add optional **notes**.
+4. Click **Create**. Listings expire after 48 hours.
+
+![Screenshot: Create listing modal](docs/screenshots/create-listing.png)
+
+### Propose a swap
+
+1. Open a listing you're interested in.
+2. Review the seller/buyer info and credit balance.
+3. Click **Propose Swap**.
+4. You'll be taken to the swap page to coordinate with the other party.
+
+![Screenshot: Listing detail with Propose Swap](docs/screenshots/listing-detail.png)
+
+### Complete a swap
+
+1. On the **Swap Details** page, use the **Progress** timeline to see the current status.
+2. Use **Actions** to **Accept**, **Cancel**, or **Confirm** the swap.
+3. Use **Messages** to coordinate with your swap partner.
+4. The **giver** (person transferring credits) follows the on-screen instructions to complete the transfer.
+5. Both parties confirm to mark the swap as **Completed**.
+
+![Screenshot: Swap details page](docs/screenshots/swap-details.png)
+
+---
 
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start development server |
-| `npm run build` | Production build |
-| `npm run db:seed` | Seed database with demo users and listings |
+| `npm run build` | Build for production |
+| `npm start` | Run production server |
+| `npm run db:seed` | Seed demo users and listings |
 | `npm run db:reset` | Reset database and re-run migrations |
 
 ## Project Structure
@@ -85,6 +166,9 @@ prisma/
 └── migrations/        # SQL migrations
 ```
 
+---
+
 ## Team
 
 Built for the NUS Residential College Hackathon 2026.
+
