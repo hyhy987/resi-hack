@@ -49,10 +49,13 @@ function BarChart({
           const height = max > 0 ? (d.swaps / max) * 100 : 0;
           const dayLabel = new Date(d.date + "T00:00:00").toLocaleDateString(
             "en-US",
-            { weekday: "short" }
+            { weekday: "short" },
           );
           return (
-            <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              key={d.date}
+              className="flex-1 flex flex-col items-center gap-1"
+            >
               <span className="text-[10px] font-bold text-[var(--text-muted)]">
                 {d.swaps > 0 ? d.swaps : ""}
               </span>
@@ -85,13 +88,35 @@ function SupplyDemandChart({
   breakfastRequests: number;
   dinnerRequests: number;
 }) {
-  const max = Math.max(breakfastOffers, dinnerOffers, breakfastRequests, dinnerRequests, 1);
+  const max = Math.max(
+    breakfastOffers,
+    dinnerOffers,
+    breakfastRequests,
+    dinnerRequests,
+    1,
+  );
 
   const bars = [
-    { label: "Bkfst Offers", value: breakfastOffers, color: "var(--offer-green)" },
-    { label: "Bkfst Requests", value: breakfastRequests, color: "var(--request-blue)" },
-    { label: "Dinner Offers", value: dinnerOffers, color: "var(--offer-green)" },
-    { label: "Dinner Requests", value: dinnerRequests, color: "var(--request-blue)" },
+    {
+      label: "Bkfst Offers",
+      value: breakfastOffers,
+      color: "var(--offer-green)",
+    },
+    {
+      label: "Bkfst Requests",
+      value: breakfastRequests,
+      color: "var(--request-blue)",
+    },
+    {
+      label: "Dinner Offers",
+      value: dinnerOffers,
+      color: "var(--offer-green)",
+    },
+    {
+      label: "Dinner Requests",
+      value: dinnerRequests,
+      color: "var(--request-blue)",
+    },
   ];
 
   return (
@@ -106,7 +131,10 @@ function SupplyDemandChart({
               <span className="text-[11px] font-bold text-[var(--text-secondary)]">
                 {bar.label}
               </span>
-              <span className="text-[11px] font-bold font-[Outfit]" style={{ color: bar.color }}>
+              <span
+                className="text-[11px] font-bold font-[Outfit]"
+                style={{ color: bar.color }}
+              >
                 {bar.value}
               </span>
             </div>
@@ -229,10 +257,7 @@ export default function AnalyticsPage() {
           </h3>
           <div className="space-y-3">
             {stats.topTraders.map((trader, i) => (
-              <div
-                key={trader.name}
-                className="flex items-center gap-4"
-              >
+              <div key={trader.name} className="flex items-center gap-4">
                 <div
                   className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold font-[Outfit] ${
                     i === 0
@@ -264,21 +289,33 @@ export default function AnalyticsPage() {
       )}
 
       {/* Empty state for no activity */}
-      {stats.completedSwaps === 0 && stats.activeOffers === 0 && stats.activeRequests === 0 && (
-        <div className="text-center py-12 animate-fade-in">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-40">
-            <line x1="18" y1="20" x2="18" y2="10" />
-            <line x1="12" y1="20" x2="12" y2="4" />
-            <line x1="6" y1="20" x2="6" y2="14" />
-          </svg>
-          <p className="text-[var(--text-muted)] font-[Outfit] text-lg mb-2">
-            No activity in {stats.diningHall} yet
-          </p>
-          <p className="text-sm text-[var(--text-muted)] opacity-60">
-            Be the first to create a listing!
-          </p>
-        </div>
-      )}
+      {stats.completedSwaps === 0 &&
+        stats.activeOffers === 0 &&
+        stats.activeRequests === 0 && (
+          <div className="text-center py-12 animate-fade-in">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--text-muted)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mx-auto mb-4 opacity-40"
+            >
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
+            <p className="text-[var(--text-muted)] font-[Outfit] text-lg mb-2">
+              No activity in {stats.diningHall} yet
+            </p>
+            <p className="text-sm text-[var(--text-muted)] opacity-60">
+              Be the first to create a listing!
+            </p>
+          </div>
+        )}
     </PageContainer>
   );
 }

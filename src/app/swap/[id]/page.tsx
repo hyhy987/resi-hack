@@ -43,16 +43,32 @@ export default function SwapDetailPage() {
     return (
       <PageContainer>
         <div className="text-center py-20 animate-fade-in">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 opacity-40">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--text-muted)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mx-auto mb-4 opacity-40"
+          >
             <path d="M17 1l4 4-4 4" />
             <path d="M3 11V9a4 4 0 0 1 4-4h14" />
             <path d="M7 23l-4-4 4-4" />
             <path d="M21 13v2a4 4 0 0 1-4 4H3" />
           </svg>
-          <p className="text-[var(--text-muted)] font-[Outfit] text-lg mb-2">Swap not found</p>
-          <p className="text-sm text-[var(--text-muted)] opacity-60 mb-4">It may have been cancelled or completed.</p>
+          <p className="text-[var(--text-muted)] font-[Outfit] text-lg mb-2">
+            Swap not found
+          </p>
+          <p className="text-sm text-[var(--text-muted)] opacity-60 mb-4">
+            It may have been cancelled or completed.
+          </p>
           <Link href="/">
-            <Button variant="secondary" size="sm">Back to Marketplace</Button>
+            <Button variant="secondary" size="sm">
+              Back to Marketplace
+            </Button>
           </Link>
         </div>
       </PageContainer>
@@ -73,7 +89,17 @@ export default function SwapDetailPage() {
           href="/"
           className="inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors font-[Outfit] group"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="group-hover:-translate-x-0.5 transition-transform"
+          >
             <path d="m15 18-6-6 6-6" />
           </svg>
           Back to Marketplace
@@ -144,7 +170,9 @@ export default function SwapDetailPage() {
         <div className="flex flex-col lg:flex-row gap-6 items-stretch">
           <div className="lg:w-1/3 flex">
             <div className="flex-1">
-              {isGiver && swap.status === "ACCEPTED" ? (
+              {isGiver &&
+              (swap.status === "ACCEPTED" ||
+                swap.status === "CONFIRMED_BY_RECEIVER") ? (
                 <SwapInstructions swap={swap} partner={partner} />
               ) : (
                 <div className="glass-card-static p-6 h-full flex flex-col items-center justify-center border-dashed border-2 border-[var(--border)] opacity-40">

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { useRouter } from "next/navigation";
 import { UserData } from "@/types";
 
@@ -35,10 +41,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchAuth]);
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setCurrentUser(null);
-    router.push("/login");
-    router.refresh();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+
+      router.push("/login");
+
+      setTimeout(() => {
+        setCurrentUser(null);
+        router.refresh();
+      }, 10);
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   return (
