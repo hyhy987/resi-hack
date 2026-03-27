@@ -34,7 +34,7 @@ npm install
 
 ### 2. Set up the database
 
-The app uses SQLite with Prisma. No environment variables are required for local development.
+The app uses SQLite with Prisma. Copy `.env.example` to `.env` (or set `DATABASE_URL` yourself — paths are relative to `prisma/schema.prisma`).
 
 ```bash
 # Generate Prisma client and run migrations
